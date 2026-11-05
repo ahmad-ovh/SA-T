@@ -1,0 +1,614 @@
+diff --git a/.gitignore b/.gitignore
+index 7ed893b..3e59a0f 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -6,3 +6,5 @@ out/
+ !.env.example
+ *.tsbuildinfo
+ .DS_Store
++# Local visual QA export; not part of the deployable artefact
++motion-frames.html
+diff --git a/README.md b/README.md
+index 99a7ccb..5f8c0a9 100644
+--- a/README.md
++++ b/README.md
+@@ -123,3 +123,44 @@ npm install
+ npm run check:gnss
+ npm run build
+ ```
++
++## Chapter 04 motion refinement / 5 November 2026
++
++This update builds directly on **`project-san-andreas-gnss-fixed.zip`**. It retains the sourced GNSS fallback, EarthScope adapter, five-chapter order, and unchanged student-research placeholders.
++
++- The timeline now begins at 200 Ma and advances continuously (frame-rate independent) to 0 Ma. Playback ends at the present without snapping back to 200 Ma. PLAY/PAUSE, REPLAY, 0.5–4×, marker jumps, drag-to-scrub and reset work through real React state.
++- The conceptual oceanic trench gradually gives way to a ridge-approach and ridge–trench interaction before a modern right-lateral transform trace emerges. This is **not** a plate-coordinate reconstruction: rendered coastline, offsets and timing of graphic fades are **purely illustrative**, not measurable paleogeographic positions. The ridge line remains clipped to the oceanic side.
++- The Then/Now comparison can be dragged **on the image itself** with a pointer/touch device; the separate native range control remains accessible to keyboards and assistive technology.
++- The transform-fault offset animation uses a single `requestAnimationFrame` clock with consistent elapsed-time rate, no interval stepping or sudden 100%→0% loop. Illustrative layers fade in/out rather than pop in/out.
++- The engineering comparison eases **only** when a selector is changed; it does not continuously shake buildings or imply calculated earthquake response. Formation selectors and evidence tab changes use restrained editorial fades.
++- Reduced-motion preferences stop automatic animation and keep all manually scrubbed states usable. Animations suspend naturally in background tabs and cap elapsed-time deltas so tab switching does not cause giant jumps.
++
++Local validation and preview commands after `npm install`:
++
++```bash
++npm run check:source
++npm run check:gnss
++npm run check:motion
++npm run preview:motion  # writes motion-frames.html, a static 5-era contact sheet
++npm run typecheck
++npm run build
++npm run dev
++```
++
++**Important distinction:** `motion-frames.html` is a contact sheet produced from the **actual TSX SVG renderer**; it is not a running Next.js site. The independent snapshot review covers 200/100/73/30/0 Ma. Browser interaction, production build and deployment still require an environment with dependencies installed.
++
++**Before submission:** The attached 2026 assignment brief and rubric require (1) five chapters in order, (2) three independent evidence sources, (3) three genuinely explanatory interactions, (4) 1,200 on-screen words maximum, (5) at least four cited sources, including two peer-reviewed works, (6) a 60-second user-narrated MP4 and (7) a signed one-page cover sheet with an honest AI declaration. The current conceptual animation and verification placeholders are **not substitutes for the student's own scientific reasoning, validation, or a cited reconstruction**. Run the alternate-state word audit and test a live share link in an incognito browser before submission.
++
++### Applying this motion patch
++
++The incremental `project-san-andreas-motion-fix.patch` is for the **GNSS-fixed Next.js ZIP**, not the earlier Next.js handoff or the Gemini v0 archive. Alternatively, use the complete `project-san-andreas-motion-polished.zip`.
++
++```bash
++# In an extracted copy of project-san-andreas-gnss-fixed.zip
++
++git apply --check project-san-andreas-motion-fix.patch
++git apply project-san-andreas-motion-fix.patch
++npm install
++npm run check:motion
++npm run build
++```
+diff --git a/VERIFICATION.md b/VERIFICATION.md
+index 8525072..1413093 100644
+--- a/VERIFICATION.md
++++ b/VERIFICATION.md
+@@ -20,3 +20,17 @@
+ - Original conversion patch: generated against the v0 RAR; **GNSS incremental patch** separately generated against the previous Next.js handoff and checked against it with `git apply --check`.
+ 
+ Academic deliverables not generated: student research interpretations, complete data/captions, AI declaration and signed cover sheet, self-narrated 60-second walkthrough.
++
++## Animation/refinement verification — 5 November 2026
++
++- Source baseline: **exact extracted contents** of `project-san-andreas-gnss-fixed.zip`, not the Gemini vanilla-JS v0. Legacy v0 remains unmodified.
++- Five required chapter IDs, existing evidence adapters, student placeholders, and citation links retained.
++- `npm run check:motion`: **passed**, checking the actual time-scene JSX over nine time positions (200, 175, 100, 73, 50, 30, 20, 10, 0 Ma). Assertions verify a monotonic fault trace reveal, ridge clipping to the oceanic part of the figure, finite SVG values, keyboard-compatible scrubbing control, drag-capture comparator, tab suspension and `prefers-reduced-motion` handling.
++- `node scripts/check-source.mjs`: **passed**.
++- `node scripts/test-gnss.mjs`: **passed** (GNSS unchanged in this motion update).
++- All modified TS/TSX modules: parser/syntax checks via locally available TypeScript compiler `transpileModule` **passed**; syntax-only, **not** a full Next.js typecheck.
++- Static illustrated frames for 200/100/73/30/0 Ma were rendered directly from `components/TimeMachine.tsx` and inspected using CairoSVG; screenshot/contact sheet `san-andreas-motion-review.png` delivered separately. 73 Ma is an **illustrative interpolation**, not a sourced measured reconstruction.
++- Chrome headless screenshot could not be completed in this sandbox (browser runtime stalled). Browser UI interaction, mobile responsive QA and production-build verification remain **unverified**.
++- `npm install`: **BLOCKED** by npm registry DNS EAI_AGAIN. Dependencies/production Next.js build unavailable in this environment.
++- The on-screen word limit, scientific completeness (especially verified palaeogeographic model and mapped geological GIS observations), live data endpoints, student-authored interpretation, signed AI declaration and walkthrough remain the student's submission checks. No claim of total assignment completeness is made.
++- Incremental patch from `project-san-andreas-gnss-fixed.zip`: generated and verified with `git apply --check` against untouched archive extraction.
+diff --git a/app/globals.css b/app/globals.css
+index 071abdc..0a3cd96 100644
+--- a/app/globals.css
++++ b/app/globals.css
+@@ -15,3 +15,43 @@
+ @media(max-width:700px){.top-ribbon{height:auto;padding:9px 16px;min-height:30px}.top-ribbon span:nth-child(2){display:none}.top-ribbon span{font-size:8px}.site-header{min-height:62px;padding:0 15px}.logo-lockup{min-width:0;font-size:9px}.logo-mark{width:37px;height:37px;font-size:17px}.reference-trigger{min-height:36px;padding:0 8px}.chapter-nav.open{grid-template-columns:1fr 1fr}.hero{display:flex;flex-direction:column}.hero-copy{min-height:630px}.hero h1{font-size:clamp(48px,11vw,77px)}.hero-visual{min-height:440px}.hero-map{max-height:420px}.hero-bottom{padding-top:35px}.chapter{padding:66px 16px 75px}.section-heading{grid-template-columns:1fr;gap:15px;margin-bottom:32px}.chapter-number{font-size:36px;display:flex;align-items:center;gap:15px}.chapter-rule{margin:0;width:44px}.chapter h2{font-size:clamp(42px,10vw,65px)}.stage-controls{grid-template-columns:1fr}.stage{min-height:55px}.stage-note{flex-direction:column;align-items:flex-start;gap:7px}.two-up,.time-notes,.malaysia-intro,.closing-notes{grid-template-columns:1fr}.earth-diagram{min-height:0}.fault-layout{gap:8px}.evidence-tabs{flex-direction:column}.evidence-tabs button{border-right:0;border-bottom:1px solid #a79b88;justify-content:flex-start}.evidence-body{padding:8px}.evidence-visual,.evidence-sidebar{padding:13px}.evidence-sidebar{display:flex}.dataset-footer{flex-direction:column;align-items:flex-start}.time-main{padding:10px}.time-float{left:8px;bottom:8px}.time-float strong{font-size:24px}.time-float span{font-size:8px}.playback-controls{gap:7px}.playback-controls .outline-action,.playback-controls .dark-action{min-height:38px;padding:8px}.playback-controls select{margin-left:0}.engineering-visual.dual{grid-template-columns:1fr}.engineering-controls{display:grid}.malaysia-intro{padding:23px}.bottom-research{flex-direction:column;gap:10px}.bottom-research>b{min-width:0}.site-footer{grid-template-columns:1fr;padding:50px 22px}.reference-content{padding:24px 18px}.references li{grid-template-columns:35px 1fr}.ref-sequence{font-size:18px}}
+ @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+ .depth-distribution{font:10px var(--mono);padding:10px;border:1px solid var(--hair)}.depth-distribution b{display:block;font-weight:700}.depth-distribution svg{width:100%;height:96px}.depth-distribution small{font-size:9px;color:#6e6559;line-height:1.4;display:block}
++
++/* MOTION PASS v2: archive-grade transitions, always subordinate to the data. */
++:root{--motion-quick:180ms;--motion-regular:360ms;--motion-slow:560ms;--motion-ease:cubic-bezier(.22,1,.36,1)}
++button,select,.stage,.segmented button,.chapter-nav a,.reference-trigger,.primary-action{transition:background-color var(--motion-quick) ease,color var(--motion-quick) ease,border-color var(--motion-quick) ease,box-shadow var(--motion-quick) ease}
++button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #c28368;outline-offset:3px}
++button:disabled{cursor:not-allowed;opacity:.48}
++.stage-note{animation:archive-reveal var(--motion-regular) var(--motion-ease) both}
++@keyframes archive-reveal{from{opacity:.45;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
++.earth-layer{transition:stroke-width var(--motion-quick) ease,stroke var(--motion-quick) ease,fill var(--motion-regular) var(--motion-ease)}
++.fault-view-pane{animation:archive-reveal var(--motion-regular) var(--motion-ease) both}
++.fault-rock-markers{transition:opacity var(--motion-regular) ease}
++.time-display{isolation:isolate;background:#536d6d;border:1px solid #6b7770}
++.time-visual{aspect-ratio:720/410;object-fit:cover}
++.time-progress{position:absolute;inset:auto 0 0;height:4px;background:rgba(20,24,22,.5);pointer-events:none}
++.time-progress span{height:100%;display:block;background:#dbad8e;box-shadow:0 0 8px #dbad8e55}
++.time-float{bottom:22px;left:22px;z-index:3;min-width:190px;border-left:3px solid #bd7c6b;backdrop-filter:blur(7px);box-shadow:0 11px 26px #0005}
++.time-float strong{font-variant-numeric:tabular-nums;white-space:nowrap}
++.time-keyframes button{position:relative;min-height:36px;transition:color var(--motion-quick) ease}
++.time-keyframes button::before{content:"";position:absolute;left:50%;top:-15px;width:5px;height:5px;transform:translateX(-50%) rotate(45deg);background:#998c78;transition:background var(--motion-quick) ease,scale var(--motion-quick) ease}
++.time-keyframes button[aria-pressed="true"]::before{background:#daa08b;scale:1.4}
++#time-position{--range-progress:0%;background:linear-gradient(to right,#be8574 var(--range-progress),#686b61 var(--range-progress));height:5px;appearance:none;border-radius:0;width:100%;cursor:pointer}
++#time-position::-webkit-slider-thumb{appearance:none;width:18px;height:18px;transform:rotate(45deg);background:#efe0cd;border:3px solid #8e3c32;box-shadow:0 0 0 3px #20211d}
++#time-position::-moz-range-thumb{width:13px;height:13px;transform:rotate(45deg);background:#efe0cd;border:3px solid #8e3c32;border-radius:0}
++.time-compare{cursor:ew-resize;touch-action:pan-y;user-select:none;isolation:isolate;border:1px solid #656e66}
++.time-compare .compare-top{will-change:clip-path}
++.time-compare .time-visual{pointer-events:none}
++.compare-line{z-index:2;background:#f8eee0;box-shadow:0 0 0 1px #272824,0 0 18px #0005;pointer-events:none}
++.compare-grip{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:41px;height:41px;border:2px solid #f1e5d5;border-radius:50%;background:#8e3c32;color:#f8eee0;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px #0006;font:18px var(--mono)}
++.comparison-label{z-index:3;pointer-events:none}
++.motion-hint{font:11px/1.6 var(--mono);padding:9px 0;color:#d8c0ab}
++.engineering-ground{transition:fill var(--motion-slow) ease,opacity var(--motion-slow) ease}
++.engineering-visual>div{animation:archive-reveal var(--motion-regular) var(--motion-ease) both}
++.engineering-visual svg g[stroke]{transition:stroke var(--motion-regular) ease}
++@media(max-width:700px){.time-float{bottom:10px;left:10px;min-width:0;padding:8px 10px;gap:3px}.time-float strong{font-size:23px}.time-float span{font-size:8px}.comparison-label{font-size:8px;top:7px;padding:5px}.compare-grip{width:32px;height:32px;font-size:14px}.time-keyframes button{font-size:10px}.time-main .panel-heading{font-size:9px}.time-visual{min-height:220px;object-fit:cover}}
++@media(prefers-reduced-motion:reduce){.stage-note,.fault-view-pane,.engineering-visual>div{animation:none!important}.earth-layer,.fault-rock-markers,.engineering-ground,.time-keyframes button,.time-keyframes button::before,.compare-line,button,select,a{transition:none!important}.time-compare .compare-top{will-change:auto}}
++
++.evidence-body{animation:archive-reveal var(--motion-regular) var(--motion-ease) both}
++.geo-grid circle,.depth-distribution rect{transition:opacity var(--motion-quick) ease,fill var(--motion-quick) ease}
++.evidence-tabs button{transition:background-color var(--motion-quick) ease,color var(--motion-quick) ease,border-color var(--motion-quick) ease}
++@media(prefers-reduced-motion:reduce){.evidence-body{animation:none!important}.geo-grid circle,.depth-distribution rect{transition:none!important}}
+diff --git a/components/EarthInterior.tsx b/components/EarthInterior.tsx
+index aa2dc44..5aaff4d 100644
+--- a/components/EarthInterior.tsx
++++ b/components/EarthInterior.tsx
+@@ -12,7 +12,7 @@ export function EarthInterior() {
+   const circleSizes = [174, 146, 102, 55];
+   function changeMode(next: Mode) { setMode(next); setSelected(0); }
+   return <section id="origin" className="chapter chapter-paper" data-chapter><SectionHeading number="01" label="PLANETARY FORMATION" title="Origin & Interior" summary="Before plates can move, a planet must take shape—and develop layers with different physical behaviours." />
+-    <div className="formation"><div className="panel-heading"><span>01 / THE FORMATION SEQUENCE</span><span>STUDENT RESEARCH REQUIRED</span></div><div className="stage-controls" role="group" aria-label="Earth formation stages">{story.formation.map((item, i) => <button type="button" className={stage===i?"stage active":"stage"} key={item.title} aria-pressed={stage===i} onClick={()=>setStage(i)}><span>0{i+1}</span><b>{item.title}</b></button>)}</div><div className="stage-note"><b>{story.formation[stage].subtitle}</b><ResearchSlot>{story.formation[stage].text}</ResearchSlot></div></div>
++    <div className="formation"><div className="panel-heading"><span>01 / THE FORMATION SEQUENCE</span><span>STUDENT RESEARCH REQUIRED</span></div><div className="stage-controls" role="group" aria-label="Earth formation stages">{story.formation.map((item, i) => <button type="button" className={stage===i?"stage active":"stage"} key={item.title} aria-pressed={stage===i} onClick={()=>setStage(i)}><span>0{i+1}</span><b>{item.title}</b></button>)}</div><div className="stage-note" key={stage}><b>{story.formation[stage].subtitle}</b><ResearchSlot>{story.formation[stage].text}</ResearchSlot></div></div>
+     <div className="two-up interior-grid"><ScientificFigure figure="01-A" description="Original schematic. Relative radial distances are illustrative; no physical scale is implied."><div className="diagram-panel"><div className="panel-heading"><span>02 / CROSS-SECTION EXPLORER</span><span>SELECT A LAYER</span></div><svg className="earth-diagram" viewBox="0 0 500 420" role="group" aria-label="Select Earth layers for description"><defs><pattern id="earth-hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5 5 0" stroke="#d4c1a0" strokeOpacity=".12" /></pattern></defs>{layers.map((layer,i)=><circle key={layer.id} cx="240" cy="210" r={circleSizes[i]} fill={layer.color} stroke={selected===i?"#f4e7ce":"#50483d"} strokeWidth={selected===i?4:1.2} className="earth-layer" role="button" tabIndex={0} aria-label={`Select ${layer.title}`} onClick={()=>setSelected(i)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setSelected(i)}}} />)}<circle cx="240" cy="210" r="174" fill="url(#earth-hatch)" pointerEvents="none"/><path d="M240 35V384M65 210H415" stroke="#e6dcc8" strokeOpacity=".17" strokeDasharray="4 6" pointerEvents="none"/><text x="25" y="36" className="svg-caption">INTERNAL STRUCTURE / NOT TO SCALE</text><text x="362" y="391" className="svg-caption">FIG. 01-A</text></svg></div></ScientificFigure>
+     <div className="reading-panel"><div className="panel-heading"><span>VIEW BY</span><span>CLASSIFICATION 01-A</span></div><div className="segmented"><button aria-pressed={mode==="composition"} className={mode==="composition"?"selected":""} onClick={()=>changeMode("composition")}>Composition</button><button aria-pressed={mode==="mechanics"} className={mode==="mechanics"?"selected":""} onClick={()=>changeMode("mechanics")}>Mechanical</button></div><div className="layer-list" role="group" aria-label="Choose interior layer">{layers.map((layer,i)=><button type="button" key={layer.id} className={i===selected?"layer-row selected":"layer-row"} onClick={()=>setSelected(i)} aria-pressed={selected===i}><span className="layer-swatch" style={{background:layer.color}}/><span>{layer.title}</span><span>0{i+1}</span></button>)}</div><div className="selected-layer"><p className="eyebrow">SELECTED MATERIAL / {mode.toUpperCase()}</p><h3>{layers[selected].title}</h3><ResearchSlot>{layers[selected].note}</ResearchSlot></div></div></div>
+   </section>;
+diff --git a/components/FaultLab.tsx b/components/FaultLab.tsx
+index 4ee66d9..d177e89 100644
+--- a/components/FaultLab.tsx
++++ b/components/FaultLab.tsx
+@@ -1,5 +1,6 @@
+ "use client";
+-import { useEffect, useState } from "react";
++import { useEffect, useRef, useState } from "react";
++import { useAnimationClock, useReducedMotion } from "./useMotion";
+ import { Pause, Play, RotateCcw } from "lucide-react";
+ import { SectionHeading, ResearchSlot, ScientificFigure, SourceLabel } from "./Shared";
+ import { story } from "@/src/content/story";
+@@ -7,17 +8,40 @@ import { story } from "@/src/content/story";
+ type View = "overhead" | "split" | "section";
+ function Diagram({ displacement, view, layers }: { displacement: number; view: View; layers: boolean }) {
+   const shift = (displacement - 50) * .75;
+-  const overhead = <svg viewBox="0 0 640 340" className="fault-diagram" role="img" aria-label="Illustrative right-lateral motion: Pacific side moves northwest relative to North American side"><defs><pattern id="fault-lines" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 18 18 0" stroke="#f0e7d4" strokeOpacity=".13"/></pattern></defs><rect width="318" height="340" fill="#7d8976"/><rect x="322" width="318" height="340" fill="#ae977e"/>{layers&&<><path d={`M20 ${84-shift} 210 ${110-shift} 318 ${155-shift}`} fill="none" stroke="#c8d3c3" strokeWidth="13"/><path d={`M322 ${155+shift} 444 ${198+shift} 620 ${208+shift}`} fill="none" stroke="#e7d8bf" strokeWidth="13"/></>}
++  const overhead = <svg viewBox="0 0 640 340" className="fault-diagram" role="img" aria-label="Illustrative right-lateral motion: Pacific side moves northwest relative to North American side"><defs><pattern id="fault-lines" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 18 18 0" stroke="#f0e7d4" strokeOpacity=".13"/></pattern></defs><rect width="318" height="340" fill="#7d8976"/><rect x="322" width="318" height="340" fill="#ae977e"/><g className="fault-rock-markers" opacity={layers ? 1 : 0}>
++      <path d={`M20 ${84-shift} 210 ${110-shift} 318 ${155-shift}`} fill="none" stroke="#c8d3c3" strokeWidth="13"/>
++      <path d={`M322 ${155+shift} 444 ${198+shift} 620 ${208+shift}`} fill="none" stroke="#e7d8bf" strokeWidth="13"/>
++    </g>
+     <path d="M320 0V340" stroke="#702f2b" strokeWidth="5"/><path d="M320 0V340" stroke="#e1c8b3" strokeDasharray="5 9" strokeWidth="1.4"/><g stroke="#efe8d7" strokeWidth="4" fill="none"><path d="M144 245V113l-11 17m11-17 11 17"/><path d="M490 110v133l-11-17m11 17 11-17"/></g><text x="20" y="36" className="svg-white">PACIFIC PLATE</text><text x="355" y="36" className="svg-dark">N. AMERICAN PLATE</text><text x="24" y="312" className="svg-white">RELATIVE NW</text><text x="365" y="312" className="svg-dark">RELATIVE SE</text><text x="329" y="166" className="svg-dark">FAULT</text></svg>;
+-  const section = <svg viewBox="0 0 640 245" className="fault-diagram" role="img" aria-label="Conceptual geological depth section through a vertical transform fault"><rect width="640" height="48" fill="#a0ac94"/><rect y="48" width="640" height="80" fill="#a28b72"/><rect y="128" width="640" height="117" fill="#6e776a"/>{layers&&<><path d="M0 69H640M0 140H640M0 187H640" stroke="#e2d2ba" strokeOpacity=".35"/></>}
++  const section = <svg viewBox="0 0 640 245" className="fault-diagram" role="img" aria-label="Conceptual geological depth section through a vertical transform fault"><rect width="640" height="48" fill="#a0ac94"/><rect y="48" width="640" height="80" fill="#a28b72"/><rect y="128" width="640" height="117" fill="#6e776a"/><path className="fault-rock-markers" d="M0 69H640M0 140H640M0 187H640" stroke="#e2d2ba" strokeOpacity=".35" opacity={layers ? 1 : 0}/>
+     <path d="M320 0V151" stroke="#8E3C32" strokeDasharray="7 6" strokeWidth="4"/><path d="M320 151v90" stroke="#e1d5bd" strokeWidth="2" strokeDasharray="2 7"/><text x="20" y="31" className="svg-dark">WEST / PACIFIC</text><text x="405" y="31" className="svg-dark">EAST / NORTH AMERICA</text><text x="20" y="103" className="svg-white">CRUST (SCHEMATIC)</text><text x="20" y="211" className="svg-white">DEEPER ROCK</text><text x="338" y="171" className="svg-white">FAULT ZONE (ILLUSTRATIVE)</text></svg>;
+   return <div className="fault-views">{view!=="section"&&<div className="fault-view-pane">{overhead}<span className="view-caption">PLAN VIEW / NOT TO SCALE</span></div>}{view!=="overhead"&&<div className="fault-view-pane">{section}<span className="view-caption">SECTION / NOT TO SCALE</span></div>}</div>;
+ }
+ export function FaultLab() {
+-  const [view, setView] = useState<View>("split"); const [playing,setPlaying] = useState(false); const [speed,setSpeed] = useState(1); const [displacement,setDisplacement] = useState(50); const [layers,setLayers] = useState(true);
+-  useEffect(()=>{ if(!playing) return; if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){setPlaying(false);return;} const handle=window.setInterval(()=>setDisplacement(v=>v>=100?0:Math.min(100,v+1)),120/speed);return()=>clearInterval(handle);},[playing,speed]);
++  const [view, setView] = useState<View>("split");
++  const [playing,setPlaying] = useState(false);
++  const [speed,setSpeed] = useState(1);
++  const [displacement,setDisplacement] = useState(50);
++  const [layers,setLayers] = useState(true);
++  const reduced = useReducedMotion();
++  const position = useRef(displacement);
++  useEffect(() => { position.current = displacement; }, [displacement]);
++  useEffect(() => { if (reduced) setPlaying(false); }, [reduced]);
++  useAnimationClock(playing && !reduced, speed, dt => {
++    const next = Math.min(100, position.current + dt * 13);
++    position.current = next;
++    setDisplacement(next);
++    if (next >= 100) setPlaying(false);
++  });
++  const setOffset = (next: number) => { position.current = next; setDisplacement(next); setPlaying(false); };
++  const togglePlay = () => {
++    if (playing) { setPlaying(false); return; }
++    if (reduced) return;
++    if (position.current >= 99.99) { position.current = 0; setDisplacement(0); }
++    setPlaying(true);
++  };
+   return <section id="tectonics" className="chapter chapter-dark" data-chapter><SectionHeading number="02" label="TRANSFORM KINEMATICS" title="Tectonic Setting" summary="Two plates pass sideways. Explore the movement from above and below the ground." />
+     <div className="fault-layout"><div className="lab-main"><div className="panel-heading"><span>PLATE BOUNDARY LAB / INSTRUMENT 02</span><span>ILLUSTRATIVE MOTION ONLY</span></div><div className="lab-view-tabs" role="group" aria-label="Fault diagram view">{(["overhead","split","section"] as View[]).map(v=><button key={v} aria-pressed={v===view} className={v===view?"active":""} onClick={()=>setView(v)}>{v.toUpperCase()}</button>)}</div><ScientificFigure figure="02" description="Original right-lateral transform model. Displacement is a visual slider, not a velocity or earthquake forecast."><Diagram view={view} displacement={displacement} layers={layers}/></ScientificFigure></div>
+-      <div className="lab-sidebar"><p className="eyebrow">CASE 02 / SHEAR MARGIN</p><h3>Two plates.<br/><em>One boundary.</em></h3><p className="body-copy">Pacific and North American plates move laterally along a transform system. No magnitude or rupture time is calculated here.</p><SourceLabel id="atwater1970">TECTONIC CONTEXT</SourceLabel><div className="control-unit"><div className="control-label"><label htmlFor="fault-displacement">ILLUSTRATIVE OFFSET</label><output>{displacement}%</output></div><input id="fault-displacement" type="range" min="0" max="100" value={displacement} onChange={e=>{setPlaying(false);setDisplacement(Number(e.target.value));}}/></div><div className="control-unit"><label htmlFor="fault-speed">PLAYBACK SPEED</label><select id="fault-speed" value={speed} onChange={e=>setSpeed(Number(e.target.value))}><option value={.5}>0.5×</option><option value={1}>1×</option><option value={2}>2×</option><option value={4}>4×</option></select></div><label className="check-row"><input type="checkbox" checked={layers} onChange={e=>setLayers(e.target.checked)}/> Show illustrative rock layers</label><div className="control-buttons"><button className="dark-action" onClick={()=>setPlaying(!playing)}>{playing?<Pause size={16}/>:<Play size={16}/>} {playing?"PAUSE":"ANIMATE"}</button><button className="outline-action" onClick={()=>{setPlaying(false);setDisplacement(50);}}><RotateCcw size={15}/> RESET</button></div><div className="model-caution"><b>NOT AN EARTHQUAKE PREDICTION</b><p>Motion, scales and cross-section are demonstrative.</p></div></div></div><div className="bottom-research"><b>SCIENTIFIC EXPLANATION</b><ResearchSlot>{story.tectonics.mechanism}</ResearchSlot></div>
++      <div className="lab-sidebar"><p className="eyebrow">CASE 02 / SHEAR MARGIN</p><h3>Two plates.<br/><em>One boundary.</em></h3><p className="body-copy">Pacific and North American plates move laterally along a transform system. No magnitude or rupture time is calculated here.</p><SourceLabel id="atwater1970">TECTONIC CONTEXT</SourceLabel><div className="control-unit"><div className="control-label"><label htmlFor="fault-displacement">ILLUSTRATIVE OFFSET</label><output>{Math.round(displacement)}%</output></div><input id="fault-displacement" type="range" min="0" max="100" step="0.1" value={displacement} onChange={e=>setOffset(Number(e.target.value))}/></div><div className="control-unit"><label htmlFor="fault-speed">PLAYBACK SPEED</label><select id="fault-speed" value={speed} onChange={e=>setSpeed(Number(e.target.value))}><option value={.5}>0.5×</option><option value={1}>1×</option><option value={2}>2×</option><option value={4}>4×</option></select></div><label className="check-row"><input type="checkbox" checked={layers} onChange={e=>setLayers(e.target.checked)}/> Show illustrative rock layers</label><div className="control-buttons"><button className="dark-action" disabled={reduced} onClick={togglePlay}>{playing?<Pause size={16}/>:<Play size={16}/>} {playing?"PAUSE":displacement>=99.99?"REPLAY":"ANIMATE"}</button><button className="outline-action" onClick={()=>setOffset(50)}><RotateCcw size={15}/> RESET</button></div>{reduced && <p className="motion-hint">Reduced motion enabled. Use the offset slider to inspect static positions.</p>}<div className="model-caution"><b>NOT AN EARTHQUAKE PREDICTION</b><p>Motion, scales and cross-section are demonstrative.</p></div></div></div><div className="bottom-research"><b>SCIENTIFIC EXPLANATION</b><ResearchSlot>{story.tectonics.mechanism}</ResearchSlot></div>
+   </section>;
+ }
+diff --git a/components/MalaysiaPanel.tsx b/components/MalaysiaPanel.tsx
+index 346ff30..59ed7a1 100644
+--- a/components/MalaysiaPanel.tsx
++++ b/components/MalaysiaPanel.tsx
+@@ -1,13 +1,16 @@
+ "use client";
+ import { useState } from "react";
++import { useAnimatedNumber } from "./useMotion";
+ import { SectionHeading, SourceLabel, ResearchSlot, ScientificFigure } from "./Shared";
+ import { story } from "@/src/content/story";
+ 
+ type Material="rock"|"soil";
+ type Design="rigid"|"ductile";
+ function Building({ ground, design }: { ground:Material;design:Design }) {
+-  const sway=ground==="soil"?11:4;
+-  return <svg viewBox="0 0 390 285" role="img" aria-label={`${ground} site and ${design} structure, illustrative no certified performance or intensity`}><rect width="390" height="285" fill="#d8d2bf"/><path d="M0 230H390V285H0Z" fill={ground==="soil"?"#b69c75":"#7b7f78"}/>{ground==="soil"?<path d="M0 245Q50 238 90 247T180 245T275 247T390 245M0 261Q65 253 135 260T285 260T390 259" fill="none" stroke="#e3cbaa" strokeWidth="3"/>:<path d="M0 250l55-9 45 11 70-10 60 11 50-13 110 12" fill="none" stroke="#aaa99c" strokeWidth="4"/>}
++  const sway=useAnimatedNumber(ground==="soil"?11:4);
++  return <svg viewBox="0 0 390 285" role="img" aria-label={`${ground} site and ${design} structure, illustrative no certified performance or intensity`}><rect width="390" height="285" fill="#d8d2bf"/><path d="M0 230H390V285H0Z" fill={ground==="soil"?"#b69c75":"#7b7f78"} className="engineering-ground"/>
++    <path className="engineering-ground" d="M0 245Q50 238 90 247T180 245T275 247T390 245M0 261Q65 253 135 260T285 260T390 259" fill="none" stroke="#e3cbaa" strokeWidth="3" opacity={ground==="soil"?1:0}/>
++    <path className="engineering-ground" d="M0 250l55-9 45 11 70-10 60 11 50-13 110 12" fill="none" stroke="#aaa99c" strokeWidth="4" opacity={ground==="rock"?1:0}/>
+     <g stroke={design==="ductile"?"#526d61":"#805447"} strokeWidth="4" fill="#c4b69c"><path d={`M140 229L${140+sway} 47h105l${-sway} 182Z`}/>{[91,135,179].map(y=><path key={y} d={`M${140+(sway*(229-y)/182)} ${y}H${245-(sway*(229-y)/182)}`} fill="none" strokeWidth="2"/>)}{[160,204,228].map(x=><path key={x} d={`M${x+sway/2} 48L${x} 229`} fill="none" strokeWidth="2"/>)}</g><path d={`M254 91q${sway*1.2} -20 0-39`} stroke="#8e3c32" fill="none" strokeWidth="2.5"/><text x="20" y="28" className="geo-label">{ground==="soil"?"SOFT SOIL CONCEPT":"ROCK CONCEPT"}</text><text x="20" y="271" className="svg-white">NOT A DESIGN CALCULATION</text><text x="263" y="53" className="geo-label">SWAY</text></svg>;
+ }
+ export function MalaysiaPanel() {
+diff --git a/components/TimeMachine.tsx b/components/TimeMachine.tsx
+index 9330bd5..95d0f27 100644
+--- a/components/TimeMachine.tsx
++++ b/components/TimeMachine.tsx
+@@ -1,24 +1,202 @@
+ "use client";
+-import { useEffect, useMemo, useState } from "react";
++import { useEffect, useMemo, useRef, useState } from "react";
++import type { CSSProperties } from "react";
+ import { Play, Pause, RotateCcw, FastForward, Rewind } from "lucide-react";
+ import { epochs } from "@/src/data/epochs";
+ import { story } from "@/src/content/story";
+ import { SectionHeading, SourceLabel, ScientificFigure, ResearchSlot } from "./Shared";
++import { smoothstep, useAnimationClock, useReducedMotion } from "./useMotion";
+ 
+-function TimeVisual({ ma, modern=false }: { ma:number; modern?:boolean }) {
+-  const stage = modern?0:ma;
+-  const isTransform=stage<=30;
+-  return <svg viewBox="0 0 650 340" className="time-visual" role="img" aria-label={`Conceptual ${modern?"present":`${ma} million years ago`} tectonic margin sketch; not a quantitative reconstruction`}><defs><pattern id="time-hatch" width="13" height="13" patternUnits="userSpaceOnUse"><path d="M0 13 13 0" stroke="#b8ab92" strokeWidth=".6"/></pattern></defs><rect width="650" height="340" fill="#b0bbb5"/><path d="M260 0 293 56 288 112 321 165 308 222 354 290 340 340H650V0" fill="#d2c2a2" stroke="#8e856f" strokeWidth="2"/><path d="M260 0 293 56 288 112 321 165 308 222 354 290 340 340H650V0" fill="url(#time-hatch)" opacity=".4"/>{!isTransform?<><path d="M205 0 240 340" stroke="#536f74" strokeWidth="5" strokeDasharray="7 8"/><path d="M157 152h76l-15-10m15 10-15 10" stroke="#2e5b61" strokeWidth="5" fill="none"/><path d="M260 0 294 56 288 112 321 165 307 222 355 290" stroke="#8E3C32" strokeWidth="4" fill="none"/><text x="22" y="36" className="svg-white">OCEANIC PLATE</text><text x="383" y="36" className="svg-dark">CONTINENTAL MARGIN</text><text x="30" y="304" className="svg-white">SUBDUCTION CONCEPT</text></>:<><path d="M271 0 305 56 300 112 329 165 315 222 362 290 351 340" fill="none" stroke="#8E3C32" strokeWidth="5" strokeDasharray="10 6"/><path d="M177 266V138m0 0-12 16m12-16 12 16" stroke="#efe6d4" strokeWidth="5" fill="none"/><path d="M487 138v128m0 0-12-16m12 16 12-16" stroke="#59483c" strokeWidth="5" fill="none"/><text x="25" y="34" className="svg-white">PACIFIC</text><text x="380" y="34" className="svg-dark">NORTH AMERICA</text><text x="24" y="316" className="svg-white">TRANSFORM CONCEPT</text></>}<text x="455" y="317" className="svg-dark">NO FIXED COORDINATES</text></svg>;
++const MILESTONES = [200, 100, 30, 0] as const;
++const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
++
++/** The geometry and relative displacement are graphic conventions, NOT a
++ * rotation model, measured plate displacement, or an epoch-specific coastline.
++ * Opacity and diagram transforms vary continuously in the timeline domain.
++ */
++export function TimeVisual({ ma, id, compact = false }: { ma: number; id: string; compact?: boolean }) {
++  const elapsed = 200 - ma;
++  const progress = elapsed / 200;
++  // A fading oceanic margin, an illustrative ridge-trench contact, and a
++  // progressively revealed transform *after* the late-margin transition.
++  const subduction = 1 - smoothstep(140, 195, elapsed); // disappears toward today
++  const ridgeApproach = smoothstep(45, 125, elapsed) * (1 - smoothstep(185, 200, elapsed));
++  const transition = smoothstep(142, 170, elapsed) * (1 - smoothstep(182, 199, elapsed));
++  const transform = smoothstep(169, 200, elapsed); // modern fault absent in Jurassic
++  const oldMargin = 1 - transform;
++  const oceanShift = progress * 130;
++  const ridgeShift = -165 + progress * 380;
++  const surfaceOffset = transform * 29;
++  const trench = "M327 -20 C351 34 342 69 365 115 S352 194 384 232 S380 304 400 342 S402 380 412 414";
++  const fault = "M357 -20 C381 34 372 69 395 115 S382 194 414 232 S410 304 430 342 S432 380 442 414";
++  const faultLength = 520;
++  return <svg viewBox="0 0 720 410" className="time-visual" role="img" aria-label={`Illustrative tectonic margin at ${ma <= .5 ? "present" : `${Math.round(ma)} million years before present`}. Schematic transition from oceanic subduction to a transform boundary; coastlines and motion are not georeferenced.`}>
++    <defs>
++      <linearGradient id={`${id}-sea`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#708c8a"/><stop offset="1" stopColor="#344f53"/></linearGradient>
++      <linearGradient id={`${id}-land`} x1="0" y1="0" x2="1" y2=".85"><stop stopColor="#e7d8bb"/><stop offset="1" stopColor="#ab9a7e"/></linearGradient>
++      <pattern id={`${id}-grid`} width="33" height="33" patternUnits="userSpaceOnUse"><path d="M33 0H0V33" fill="none" stroke="#d5dfd4" strokeWidth=".65" opacity=".17"/></pattern>
++      <pattern id={`${id}-contours`} width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(22)"><path d="M0 0V20" stroke="#e0d1b5" strokeWidth=".7" opacity=".29"/></pattern>
++      <clipPath id={`${id}-ocean-clip`}><rect width="390" height="410"/></clipPath>
++      <clipPath id={`${id}-water-shape`}><path d="M0 -20H341C368 34 359 69 382 115S369 194 401 232S397 304 417 342S419 380 429 414H0Z"/></clipPath>
++    </defs>
++    <rect width="720" height="410" fill={`url(#${id}-sea)`}/>
++    <g clipPath={`url(#${id}-ocean-clip)`}>
++      <g transform={`translate(${(oceanShift * .65).toFixed(2)} 0)`} opacity={.2 + .1 * oldMargin} stroke="#e1e7df" fill="none" strokeWidth="1">
++        <path d="M-80 29C50 0 190 70 330 28M-80 79C50 50 190 120 330 78M-80 129C50 100 190 170 330 128M-80 179C50 150 190 220 330 178M-80 229C50 200 190 270 330 228M-80 279C50 250 190 320 330 278M-80 329C50 300 190 370 330 328M-80 379C50 350 190 420 330 378"/>
++      </g>
++    </g>
++    <rect width="720" height="410" fill={`url(#${id}-grid)`}/>
++    <path d="M341 -20C368 34 359 69 382 115S369 194 401 232S397 304 417 342S419 380 429 414H730V-20Z" fill={`url(#${id}-land)`} stroke="#796c5c" strokeWidth="2"/>
++    <path d="M341 -20C368 34 359 69 382 115S369 194 401 232S397 304 417 342S419 380 429 414H730V-20Z" fill={`url(#${id}-contours)`} opacity=".65"/>
++    <path d="M440 0C474 70 460 123 514 185S505 280 563 330M500 -10C536 74 531 133 581 187S568 271 635 364" stroke="#857660" strokeOpacity=".5" fill="none" strokeWidth="2"/>
++    <g opacity={oldMargin}>
++      <path d={trench} fill="none" stroke="#c5d7d1" strokeWidth="16" opacity=".28"/>
++      <path d={trench} fill="none" stroke="#1f5358" strokeWidth="4" strokeDasharray="4 9" strokeLinecap="round"/>
++      <path d="M321 104l23 2-18 17M349 276l23 2-18 17" stroke="#edf0e8" strokeWidth="2.5" fill="none"/>
++    </g>
++    <g opacity={oldMargin} transform={`translate(${(oceanShift * .48).toFixed(2)} 0)`}>
++      <path d="M140 183H260m-19-12 19 12-19 12" stroke="#f8eedb" strokeWidth="5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
++      <path d="M65 306H177m-18-11 18 11-18 11" stroke="#edf0e8" strokeOpacity=".65" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
++    </g>
++    <g clipPath={`url(#${id}-water-shape)`}>
++      <g opacity={ridgeApproach} transform={`translate(${ridgeShift.toFixed(2)} 0)`}>
++        <path d="M164 0C209 50 192 114 243 163S237 245 292 302S294 377 330 410" stroke="#ecd59f" strokeWidth="10" strokeLinecap="round" fill="none" opacity=".48"/>
++        <path d="M164 0C209 50 192 114 243 163S237 245 292 302S294 377 330 410" stroke="#f9e6b2" strokeWidth="2.5" strokeDasharray="8 8" fill="none"/>
++      </g>
++      <g opacity={transition}><circle cx="370" cy="226" r="18" fill="none" stroke="#f3dca9" strokeWidth="2" opacity=".65"/><circle cx="370" cy="226" r="5" fill="#edd5a0"/></g>
++    </g>
++    <g opacity={transform}>
++      <g transform={`translate(0 ${(-surfaceOffset).toFixed(2)})`} stroke="#d7e1ce" strokeWidth="6" strokeOpacity=".75" fill="none"><path d="M105 279Q190 266 300 287"/></g>
++      <g transform={`translate(0 ${surfaceOffset.toFixed(2)})`} stroke="#e5d3b2" strokeWidth="6" strokeOpacity=".9" fill="none"><path d="M411 285Q512 293 690 266"/></g>
++      <path d={fault} fill="none" stroke="#332b29" strokeWidth="10" strokeOpacity=".32"/>
++      <path d={fault} fill="none" stroke="#8e3c32" strokeWidth="5.5" strokeLinecap="round" strokeDasharray={`${faultLength} ${faultLength}`} strokeDashoffset={faultLength * (1-transform)}/>
++      <g stroke="#f5e9d7" strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" transform={`translate(0 ${(-surfaceOffset * .3).toFixed(2)})`}>
++        <path d="M206 272V130m-13 16 13-16 13 16"/>
++      </g>
++      <g stroke="#59463a" strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" transform={`translate(0 ${(surfaceOffset * .3).toFixed(2)})`}>
++        <path d="M555 130V272m-13-16 13 16 13-16"/>
++      </g>
++    </g>
++    <g transform="translate(20 21)">
++      <rect width="207" height="28" fill="#293d3d" opacity=".9"/>
++      <text x="12" y="18" fontFamily="monospace" fontSize="10" letterSpacing="1.6" fill="#f1e6d4">{compact ? "CONCEPTUAL MARGIN" : "SCHEMATIC • NOT TO SCALE"}</text>
++    </g>
++    <g fontFamily="monospace" fontSize="12" fontWeight="bold" letterSpacing=".5">
++      <text x="30" y="82" fill="#f1e9d8" opacity={oldMargin}>FARALLON / OCEANIC</text>
++      <text x="30" y="82" fill="#f1e9d8" opacity={transform}>PACIFIC PLATE</text>
++      <text x="488" y="82" fill="#494137">NORTH AMERICA</text>
++      <text x="30" y="386" fill="#f1e9d8" opacity={subduction}>CONVERGENT MARGIN</text>
++      <text x="30" y="386" fill="#f1e9d8" opacity={transition}>RIDGE–TRENCH CONTACT</text>
++      <text x="30" y="386" fill="#f1e9d8" opacity={transform}>RIGHT-LATERAL TRANSFORM</text>
++    </g>
++    <g transform="translate(450 332)"><rect width="249" height="54" fill="#e9dec7" fillOpacity=".9"/><text x="12" y="20" fill="#493e35" fontFamily="monospace" fontSize="11">INTERPRETIVE DIAGRAM</text><text x="12" y="38" fill="#645c4d" fontFamily="monospace" fontSize="10">NOT A PLATE ROTATION MODEL</text></g>
++  </svg>;
+ }
++
+ export function TimeMachine() {
+-  const [ma,setMa]=useState(30);const [playing,setPlaying]=useState(false);const [speed,setSpeed]=useState(1);const [compare,setCompare]=useState(54);
+-  useEffect(()=>{if(!playing)return;if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){setPlaying(false);return;}const timer=window.setInterval(()=>setMa(t=>t<=0?200:Math.max(0,t-1)),100/speed);return()=>clearInterval(timer);},[playing,speed]);
+-  const keyframe=useMemo(()=>epochs.reduce<(typeof epochs)[number]>((best,p)=>Math.abs(p.ma-ma)<Math.abs(best.ma-ma)?p:best,epochs[0]),[ma]);
+-  const interpolated=!epochs.some(p=>p.ma===ma);
+-  function step(direction: -1|1){setPlaying(false);setMa(v=>{const sorted=[200,100,30,0];const index=sorted.indexOf(v);if(index<0){const nearest=sorted.reduce((a,b)=>Math.abs(a-v)<Math.abs(b-v)?a:b);return nearest;}return sorted[Math.max(0,Math.min(3,index+direction))];});}
+-  return <section id="deep-time" className="chapter chapter-dark" data-chapter><SectionHeading number="04" label="RECONSTRUCTION RECORD" title="Then & Now" summary="A boundary is not timeless. Follow the changing tectonic regime over 200 million years."/>
+-    <div className="time-main"><div className="panel-heading"><span>PALEOGEOGRAPHIC READER / FILE 04</span><span>INTERPRETIVE GRAPHICS</span></div><div className="time-display"><TimeVisual ma={ma}/><div className="time-float"><span>GEOLOGICAL TIME</span><strong>{ma===0?"PRESENT":`${ma} Ma`}</strong><span>{interpolated?"ILLUSTRATIVE INTERPOLATION":"SCHEMATIC KEYFRAME"}</span></div></div><div className="time-controls"><div className="control-label"><label htmlFor="time-position">TIME POSITION</label><output>{ma} Ma before present</output></div><input id="time-position" type="range" min="0" max="200" step="1" value={200-ma} onChange={e=>{setMa(200-Number(e.target.value));setPlaying(false);}} aria-valuetext={`${ma} million years ago`}/><div className="time-keyframes">{epochs.map(p=><button key={p.ma} aria-pressed={ma===p.ma} onClick={()=>{setMa(p.ma);setPlaying(false);}}>{p.ma} Ma</button>)}</div><div className="playback-controls"><button className="outline-action" aria-label="Rewind to prior published time marker" onClick={()=>step(-1)}><Rewind size={17}/> PREVIOUS</button><button className="dark-action" onClick={()=>setPlaying(!playing)}>{playing?<Pause size={16}/>:<Play size={16}/>} {playing?"PAUSE":"PLAY"}</button><button className="outline-action" aria-label="Fast forward to next time marker" onClick={()=>step(1)}>NEXT <FastForward size={17}/></button><select aria-label="Playback speed" value={speed} onChange={e=>setSpeed(Number(e.target.value))}>{[.5,1,2,4].map(v=><option key={v} value={v}>{v}×</option>)}</select><button className="icon-action" aria-label="Reset to 200 Ma" onClick={()=>{setMa(200);setPlaying(false);}}><RotateCcw size={18}/></button></div></div></div>
+-    <div className="time-notes"><div className="reading-panel"><p className="eyebrow">NEAREST REFERENCE EPOCH</p><h3>{keyframe.title} / {keyframe.label}</h3><p>{keyframe.regime} · {keyframe.plate}</p><SourceLabel id="atwater1970">ATWATER / GEOLOGICAL CONTEXT</SourceLabel></div><div className="reading-panel"><p className="eyebrow">MODEL INTEGRITY</p><h3>What this can—and cannot—show.</h3><p>Graphics are conceptual, not a published coordinate reconstruction. Between labeled epochs, the animation is illustrative. Today's fault is not shown at 200 Ma.</p><ResearchSlot>{story.time.interpretation}</ResearchSlot></div></div>
+-    <div className="comparison-unit"><div className="panel-heading"><span>THEN / NOW COMPARISON</span><span>DRAG TO REVEAL</span></div><ScientificFigure figure="04" description="Two original schematic regimes shown side by side, not paleogeographic measurements."><div className="time-compare"><div className="compare-layer"><TimeVisual ma={200}/></div><div className="compare-layer compare-top" style={{clipPath:`inset(0 ${100-compare}% 0 0)`}}><TimeVisual ma={0} modern/></div><div className="compare-line" style={{left:`${compare}%`}}/><span className="comparison-label before">THEN · 200 Ma</span><span className="comparison-label after">NOW · 0 Ma</span></div></ScientificFigure><label className="visually-hidden" htmlFor="compare-slider">Comparison reveal position</label><input id="compare-slider" aria-label="Compare then and now" type="range" min="0" max="100" value={compare} onChange={e=>setCompare(Number(e.target.value))}/></div>
++  // Start at the oldest epoch so PLAY demonstrates, rather than hides, change.
++  const [ma, setMa] = useState(200);
++  const [playing, setPlaying] = useState(false);
++  const [speed, setSpeed] = useState(1);
++  const [compare, setCompare] = useState(54);
++  const reduced = useReducedMotion();
++  const maRef = useRef(ma);
++  const tweenRef = useRef<number | null>(null);
++  const compareRef = useRef<HTMLDivElement>(null);
++  useEffect(() => { maRef.current = ma; }, [ma]);
++  useEffect(() => { if (reduced) setPlaying(false); }, [reduced]);
++  useEffect(() => () => { if (tweenRef.current !== null) window.cancelAnimationFrame(tweenRef.current); }, []);
++  const stopTween = () => { if (tweenRef.current !== null) window.cancelAnimationFrame(tweenRef.current); tweenRef.current = null; };
++
++  const seek = (target: number, animate = true) => {
++    setPlaying(false);
++    stopTween();
++    target = clamp(target, 0, 200);
++    if (!animate || reduced || Math.abs(maRef.current - target) < .01) {
++      maRef.current = target;
++      setMa(target);
++      return;
++    }
++    const start = maRef.current;
++    const duration = clamp(330 + Math.abs(start-target) * 3.1, 370, 950);
++    let first: number | null = null;
++    const tick = (now: number) => {
++      if (first === null) first = now;
++      const t = clamp((now-first)/duration, 0, 1);
++      const eased = t * t * (3 - 2 * t);
++      maRef.current = start + (target-start)*eased;
++      setMa(maRef.current);
++      if (t < 1) tweenRef.current = window.requestAnimationFrame(tick);
++      else tweenRef.current = null;
++    };
++    tweenRef.current = window.requestAnimationFrame(tick);
++  };
++  useAnimationClock(playing && !reduced, speed, dt => {
++    const next = Math.max(0, maRef.current - dt * 10); // 200 Ma across 20 s at 1×
++    maRef.current = next;
++    setMa(next);
++    if (next === 0) setPlaying(false); // never jump unexpectedly to 200 Ma
++  });
++
++  const keyframe = useMemo(() => epochs.reduce<(typeof epochs)[number]>((best, p) => Math.abs(p.ma-ma) < Math.abs(best.ma-ma) ? p : best, epochs[0]), [ma]);
++  const exactEpoch = epochs.some(p => Math.abs(p.ma-ma) < .02);
++  const shownMa = Math.round(ma);
++  function step(direction: -1 | 1) {
++    const destination = direction === 1
++      ? MILESTONES.find(p => p < maRef.current - .1) ?? 0
++      : [...MILESTONES].reverse().find(p => p > maRef.current + .1) ?? 200;
++    seek(destination);
++  }
++  function togglePlay() {
++    stopTween();
++    if (playing) { setPlaying(false); return; }
++    if (reduced) return;
++    if (maRef.current <= .01) { maRef.current = 200; setMa(200); }
++    setPlaying(true);
++  }
++  function positionCompare(clientX: number) {
++    const rect = compareRef.current?.getBoundingClientRect();
++    if (rect?.width) setCompare(Math.round(clamp(((clientX - rect.left)/rect.width)*100, 0, 100)));
++  }
++
++  return <section id="deep-time" className="chapter chapter-dark" data-chapter>
++    <SectionHeading number="04" label="RECONSTRUCTION RECORD" title="Then & Now" summary="A boundary is not timeless. Follow the changing tectonic regime over 200 million years."/>
++    <div className="time-main">
++      <div className="panel-heading"><span>PALEOGEOGRAPHIC READER / FILE 04</span><span>CONCEPTUAL ANIMATED DIAGRAM</span></div>
++      <div className="time-display"><TimeVisual ma={ma} id="time-main"/>
++        <div className="time-float"><span>GEOLOGICAL TIME</span><strong>{shownMa === 0 ? "PRESENT" : `${shownMa} Ma`}</strong><span>{exactEpoch ? "SCHEMATIC REFERENCE EPOCH" : "ILLUSTRATIVE TRANSITION"}</span></div>
++        <div className="time-progress" aria-hidden="true"><span style={{width:`${(200-ma)/2}%`}} /></div>
++      </div>
++      <div className="time-controls">
++        <div className="control-label"><label htmlFor="time-position">TIME POSITION</label><output>{shownMa} Ma before present</output></div>
++        <input id="time-position" type="range" min="0" max="200" step="1" value={200-shownMa} style={{"--range-progress":`${(200-ma)/2}%`} as CSSProperties} onChange={e=>seek(200-Number(e.target.value),false)} aria-valuetext={`${shownMa} million years before present`}/>
++        <div className="time-keyframes">{epochs.map(p=><button key={p.ma} aria-pressed={Math.abs(ma-p.ma)<.5} onClick={()=>seek(p.ma)}>{p.ma===0?"NOW":`${p.ma} Ma`}</button>)}</div>
++        <div className="playback-controls">
++          <button className="outline-action" aria-label="Previous schematic time marker" onClick={()=>step(-1)} disabled={ma>=199.9}><Rewind size={17}/> PREVIOUS</button>
++          <button className="dark-action" disabled={reduced} onClick={togglePlay}>{playing?<Pause size={16}/>:<Play size={16}/>} {playing?"PAUSE":ma<=.01?"REPLAY":"PLAY"}</button>
++          <button className="outline-action" aria-label="Next schematic time marker" onClick={()=>step(1)} disabled={ma<=.01}>NEXT <FastForward size={17}/></button>
++          <select aria-label="Playback speed" value={speed} onChange={e=>setSpeed(Number(e.target.value))}>{[.5,1,2,4].map(v=><option key={v} value={v}>{v}×</option>)}</select>
++          <button className="icon-action" aria-label="Return to 200 million years ago" onClick={()=>seek(200)}><RotateCcw size={18}/></button>
++        </div>
++        {reduced && <p className="motion-hint">Reduced motion enabled. Use the slider or time markers to explore static stages.</p>}
++      </div>
++    </div>
++    <div className="time-notes">
++      <div className="reading-panel" aria-live="off"><p className="eyebrow">CLOSEST SCHEMATIC EPOCH</p><h3>{keyframe.title} / {keyframe.label}</h3><p>{keyframe.regime} · {keyframe.plate}</p><SourceLabel id="atwater1970">ATWATER / GEOLOGICAL CONTEXT</SourceLabel></div>
++      <div className="reading-panel"><p className="eyebrow">MODEL INTEGRITY</p><h3>What this can—and cannot—show.</h3><p>This is a conceptual transition, not a published coordinate reconstruction. The moving plate outlines and intervening dates are illustrative; the modern fault is absent in older stages.</p><ResearchSlot>{story.time.interpretation}</ResearchSlot></div>
++    </div>
++    <div className="comparison-unit">
++      <div className="panel-heading"><span>THEN / NOW COMPARISON</span><span>DRAG ON IMAGE OR USE SLIDER</span></div>
++      <ScientificFigure figure="04" description="Original schematic comparison, using interpretive plate outlines rather than measured palaeogeographic coordinates.">
++        <div className="time-compare" ref={compareRef} onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);positionCompare(e.clientX);}} onPointerMove={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))positionCompare(e.clientX);}} onPointerUp={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}}>
++          <div className="compare-layer"><TimeVisual ma={200} id="compare-then" compact/></div>
++          <div className="compare-layer compare-top" style={{clipPath:`inset(0 ${100-compare}% 0 0)`}}><TimeVisual ma={0} id="compare-now" compact/></div>
++          <div className="compare-line" style={{left:`${compare}%`}}><span className="compare-grip" aria-hidden="true">↔</span></div>
++          <span className="comparison-label before">THEN · 200 Ma</span><span className="comparison-label after">NOW · 0 Ma</span>
++        </div>
++      </ScientificFigure>
++      <label className="visually-hidden" htmlFor="compare-slider">Then versus now reveal position</label>
++      <input id="compare-slider" type="range" min="0" max="100" value={compare} onChange={e=>setCompare(Number(e.target.value))} aria-valuetext={`${compare} percent present-day view revealed`}/>
++    </div>
+   </section>;
+ }
+diff --git a/components/useMotion.ts b/components/useMotion.ts
+new file mode 100644
+index 0000000..93ce266
+--- /dev/null
++++ b/components/useMotion.ts
+@@ -0,0 +1,66 @@
++"use client";
++import { useEffect, useRef, useState } from "react";
++
++/** Shared, frame-rate-independent timing for illustrative diagrams.
++ * The clock suspends in background tabs and on reduced-motion devices.
++ */
++export function useReducedMotion() {
++  const [reduced, setReduced] = useState(false);
++  useEffect(() => {
++    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
++    const update = () => setReduced(media.matches);
++    update();
++    media.addEventListener("change", update);
++    return () => media.removeEventListener("change", update);
++  }, []);
++  return reduced;
++}
++
++export function useAnimationClock(active: boolean, speed: number, onTick: (seconds: number) => void) {
++  const tick = useRef(onTick);
++  useEffect(() => { tick.current = onTick; }, [onTick]);
++  useEffect(() => {
++    if (!active) return;
++    let frameId = 0;
++    let previous: number | null = null;
++    const frame = (now: number) => {
++      // No accumulated jump after switching tabs or a dropped frame.
++      if (document.hidden) previous = null;
++      else if (previous !== null) tick.current(Math.min((now - previous) / 1000, 0.05) * speed);
++      if (!document.hidden) previous = now;
++      frameId = window.requestAnimationFrame(frame);
++    };
++    frameId = window.requestAnimationFrame(frame);
++    return () => window.cancelAnimationFrame(frameId);
++  }, [active, speed]);
++}
++
++export function smoothstep(edge0: number, edge1: number, value: number) {
++  const x = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
++  return x * x * (3 - 2 * x);
++}
++
++/** Interpolates a change of illustrative shape without continuous ambient sway. */
++export function useAnimatedNumber(target: number, duration = 560) {
++  const [value, setValue] = useState(target);
++  const valueRef = useRef(target);
++  const reduced = useReducedMotion();
++  useEffect(() => {
++    if (reduced) { valueRef.current = target; setValue(target); return; }
++    const startValue = valueRef.current;
++    if (Math.abs(startValue - target) < .001) return;
++    let start: number | null = null;
++    let frame = 0;
++    const tick = (now: number) => {
++      if (start === null) start = now;
++      const t = Math.max(0, Math.min(1, (now - start) / duration));
++      const eased = 1 - Math.pow(1 - t, 3);
++      valueRef.current = startValue + (target - startValue) * eased;
++      setValue(valueRef.current);
++      if (t < 1) frame = window.requestAnimationFrame(tick);
++    };
++    frame = window.requestAnimationFrame(tick);
++    return () => window.cancelAnimationFrame(frame);
++  }, [target, duration, reduced]);
++  return value;
++}
+diff --git a/package.json b/package.json
+index a4a94bf..85d4036 100644
+--- a/package.json
++++ b/package.json
+@@ -9,7 +9,9 @@
+     "typecheck": "tsc --noEmit",
+     "check:words": "node scripts/count-words.mjs",
+     "check:source": "node scripts/check-source.mjs",
+-    "check:gnss": "node scripts/test-gnss.mjs"
++    "check:gnss": "node scripts/test-gnss.mjs",
++    "check:motion": "node scripts/test-motion.mjs",
++    "preview:motion": "node scripts/preview-motion.mjs"
+   },
+   "dependencies": {
+     "next": "15.5.6",
+diff --git a/scripts/preview-motion.mjs b/scripts/preview-motion.mjs
+new file mode 100644
+index 0000000..c64a00a
+--- /dev/null
++++ b/scripts/preview-motion.mjs
+@@ -0,0 +1,31 @@
++/** Optional static visual-regression contact sheet from the actual TSX SVG source.
++ * Needs TypeScript (a project devDependency). No scientific data is generated.
++ * Usage: npm run preview:motion (creates motion-frames.html, ignored in ZIP).
++ */
++import fs from 'node:fs';
++import vm from 'node:vm';
++import { createRequire } from 'node:module';
++const require = createRequire(import.meta.url);
++const ts = require(process.env.TYPESCRIPT_MODULE || 'typescript');
++const file=fs.readFileSync('components/TimeMachine.tsx','utf8');
++const compiled=ts.transpileModule(file,{compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
++const React={createElement(type,props,...children){return {type,props:{...props,children}};}};
++const module={exports:{}};
++vm.runInNewContext(compiled,{React,module,exports:module.exports,require(name){if(name==='./useMotion') return {smoothstep(a,b,x){let t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);}}; return {};},window:{},console},{filename:'TimeMachine.cjs'});
++const {TimeVisual}=module.exports;
++function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');}
++function render(node){
++ if(Array.isArray(node))return node.map(render).join('');
++ if(node==null||typeof node==='boolean')return '';
++ if(typeof node!=='object')return esc(node);
++ if(typeof node.type==='function')return render(node.type(node.props));
++ const props=node.props||{};
++ const attrs=Object.entries(props).filter(([k,v])=>k!=='children'&&k!=='key'&&v!=null&&typeof v!=='function').map(([k,v])=>{
++  const key=k==='className'?'class':k.replace(/[A-Z]/g,m=>'-'+m.toLowerCase());
++  return ` ${key}="${esc(v)}"`;
++ }).join('');
++ return `<${node.type}${attrs}>${render(props.children)}</${node.type}>`;
++}
++const frames=[200,100,73,30,0].map(ma=>`<figure><div>${render(TimeVisual({ma,id:`snapshot-${ma}`}))}</div><figcaption>${ma===0?'Present':`${ma} Ma`} / conceptual and not to scale</figcaption></figure>`).join('');
++fs.writeFileSync('motion-frames.html',`<!doctype html><html><head><meta charset="utf-8"><style>html{background:#20211d;color:#e8deca;font-family:Arial}body{margin:0;padding:26px}h1{font:34px Georgia}main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}figure{margin:0;padding:9px;border:1px solid #605d55;background:#2b2d27}figure>div{overflow:hidden}svg{display:block;width:100%;height:auto}figcaption{font:12px monospace;padding:12px 3px 6px;color:#d0b8a7}@media(max-width:750px){main{grid-template-columns:1fr}}</style></head><body><h1>Chapter 04 · static visual QA contact sheet</h1><p>These are renders of the revised TSX scene at five points; playback and controls belong to the actual Next.js app.</p><main>${frames}</main></body></html>`);
++console.log('Rendered 200 / 100 / 73 / 30 / 0 Ma SVG frames from TimeVisual TSX.');
+diff --git a/scripts/test-motion.mjs b/scripts/test-motion.mjs
+new file mode 100644
+index 0000000..189a04e
+--- /dev/null
++++ b/scripts/test-motion.mjs
+@@ -0,0 +1,40 @@
++#!/usr/bin/env node
++/** Pure visual-model regression checks. Requires the project's TypeScript dev dep. */
++import assert from 'node:assert/strict';
++import fs from 'node:fs';
++import vm from 'node:vm';
++import { createRequire } from 'node:module';
++const require = createRequire(import.meta.url);
++const ts = require(process.env.TYPESCRIPT_MODULE || 'typescript');
++const source = fs.readFileSync('components/TimeMachine.tsx','utf8');
++const compiled = ts.transpileModule(source,{reportDiagnostics:true,fileName:'TimeMachine.tsx',compilerOptions:{jsx:ts.JsxEmit.React,module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}});
++assert.equal((compiled.diagnostics||[]).filter(d=>d.category===ts.DiagnosticCategory.Error).length,0,'TimeMachine.tsx parses');
++const React={createElement(type,props,...children){return {type,props:{...props,children}};}};
++const module={exports:{}};
++const smoothstep=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
++vm.runInNewContext(compiled.outputText,{React,module,exports:module.exports,require(name){return name==='./useMotion'?{smoothstep}:{};}},{filename:'TimeMachine.cjs'});
++const {TimeVisual}=module.exports;
++function flatten(node){if(!node||typeof node!=='object')return [];if(Array.isArray(node))return node.flatMap(flatten);return [node,...flatten(node.props?.children)];}
++const samples=[200,175,100,73,50,30,20,10,0];
++let previousOffset=Infinity;
++for(const ma of samples){
++ const svg=TimeVisual({ma,id:`qa-${ma}`});
++ assert.equal(svg.type,'svg');
++ const nodes=flatten(svg);
++ const red=nodes.find(n=>n.type==='path'&&n.props.stroke==='#8e3c32'&&Number(n.props.strokeWidth)===5.5);
++ assert.ok(red,`fault geometry at ${ma} Ma`);
++ assert.ok(Number.isFinite(red.props.strokeDashoffset));
++ assert.ok(red.props.strokeDashoffset<=previousOffset+1e-9,`fault trace does not reverse at ${ma} Ma`);
++ previousOffset=red.props.strokeDashoffset;
++ const clip=nodes.find(n=>n.type==='g'&&String(n.props.clipPath||'').includes('water-shape'));
++ assert.ok(clip,`ridge remains ocean-clipped at ${ma} Ma`);
++ assert.ok(!nodes.some(n=>Object.values(n.props||{}).some(v=>typeof v==='number'&&!Number.isFinite(v))),`no NaN/Infinity at ${ma} Ma`);
++}
++assert.equal(previousOffset,0,'modern fault complete at present');
++assert.equal(TimeVisual({ma:200,id:'qa'}).props.viewBox,'0 0 720 410');
++const ref=fs.readFileSync('components/useMotion.ts','utf8');
++assert.match(ref,/document\.hidden/,'clock suspends in background tabs');
++assert.match(ref,/prefers-reduced-motion/,'reduced-motion support');
++assert.match(source,/setPointerCapture/,'comparison drags on image');
++assert.match(source,/onChange=\{e=>seek\(200-Number\(e\.target\.value\),false\)\}/,'timeline scrubbing remains direct');
++console.log('Motion model checks passed: 9 eras, continuous fault reveal, ocean clipping, finite geometry, tab pause, reduced-motion, scrub and drag.');

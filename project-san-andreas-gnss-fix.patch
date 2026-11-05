@@ -1,0 +1,525 @@
+diff --git a/README.md b/README.md
+index ce2d789..99a7ccb 100644
+--- a/README.md
++++ b/README.md
+@@ -14,10 +14,11 @@ npm run typecheck
+ npm run build
+ npm run start
+ npm run check:source
++npm run check:gnss
+ npm run check:words
+ ```
+ 
+-The project is intended to deploy to Vercel as a normal Next.js App Router project. Server-side USGS API access requires outbound HTTPS from the deployment. No secrets, backend database, sign-in, or API keys are required.
++The project is intended to deploy to Vercel as a normal Next.js App Router project. Server-side USGS and EarthScope API access requires outbound HTTPS from the deployment. No secrets, backend database, sign-in, or API keys are required.
+ 
+ **Dependency caveat:** This handoff environment could not resolve `registry.npmjs.org` (`EAI_AGAIN`) and therefore could not install dependencies, generate a valid npm lockfile, or execute the Next.js build. `npm install` on a networked machine should create `package-lock.json`; commit that lockfile before formal deployment. Static TSX syntax inspection and structural tests were performed. Do not represent this release as build-verified.
+ 
+@@ -28,13 +29,17 @@ The project is intended to deploy to Vercel as a normal Next.js App Router proje
+ - `components/ArchiveHero.tsx`: conceptual California region locator (not a georeferenced map).
+ - `components/EarthInterior.tsx`: formation steps, compositional vs mechanical layer selection.
+ - `components/FaultLab.tsx`: right-lateral demonstrative map + depth diagram, view/speed/offset/playback/overlay controls. **Not a forecast or physical prediction.**
+-- `components/EvidenceDesk.tsx`: USGS earthquake map/depth histogram and filters, CSV-driven GNSS velocity vectors, conceptual geologic offset.
++- `components/EvidenceDesk.tsx`: USGS earthquake map/depth histogram, **preloaded EarthScope-sourced GNSS velocities** with official-source refresh and CSV downloads, and conceptual geologic offset.
+ - `components/TimeMachine.tsx`: 200–0 Ma schematic timeline, time control, epoch markers and comparison slider. **No unverified model state is portrayed as a published reconstruction.**
+ - `components/MalaysiaPanel.tsx`: illustrative soil/rock and structural detailing comparisons.
+ - `components/ReferenceArchive.tsx`: bibliography drawer (not a sixth chapter).
+ - `src/content/story.ts`: **student-authored interpretation placeholders** and copy.
+ - `src/data/sources.ts`: references, DOI/source links and dataset caveats.
+ - `src/data/evidence.ts`: data contracts, USGS search window and GNSS CSV validation.
++- `src/data/gnss-teaching.ts`, `public/data/earthscope-california-teaching-nam14-2022.csv`: cited, offline two-station EarthScope/UNAVCO classroom estimates (SBCC and BEMT; **approximate**, not a current official network solution).
++- `src/data/earthscope-vel.ts`: UNAVCO .vel v1.1.0 and v1.0.1 parsers, frame and uncertainty checks and m/yr → mm/yr conversion.
++- `app/api/gnss/route.ts`: server adapter for EarthScope `cwu.final_nam14.vel` published velocity product; transparent unavailable response when not accessible.
++- `scripts/test-gnss.mjs`: executable parser regression tests including both documented .vel layouts, station CSV, units, region, sigma and frame guards.
+ - `src/data/epochs.ts`: conceptual epoch labels, NOT a geospatial reconstruction dataset.
+ - `app/api/earthquakes/route.ts`: verified USGS ComCat adapter, not proxying fabricated data.
+ - `docs/RESEARCH_INTAKE_TEMPLATE.md`: fill in verified research and provenance before replacing text.
+@@ -45,13 +50,30 @@ The project is intended to deploy to Vercel as a normal Next.js App Router proje
+ 
+ The regional quake viewer requests data on the **server** from the U.S. Geological Survey's ANSS ComCat using the publicly documented FDSN event query endpoint. Current query is **2025-01-01 through 2025-12-31, latitude 32–41°N, longitude 125–115°W, M2+**, with at most 500 most recent events; it does not assert that every catalog event is on the San Andreas fault. The exact upstream URL and retrieval timestamp are visible in the UI after a successful fetch. Event location, magnitude and depth are taken from the provider; no synthetic fallback coordinates, earthquake events or magnitude predictions are provided. If the API is offline, the viewer shows an explicit unavailable state. A **bundled dated snapshot is not yet included**, as one could not be retrieved and verified in the development environment.
+ 
+-### GNSS / GPS
++### GNSS / GPS — measurements are present by default
+ 
+-The GNSS viewer intentionally displays **no measured vectors until a real CSV is provided**. Obtain documented station velocities from EarthScope/NGF, choose and record a common reference frame and analysis version, and import a file in the following exact order:
++**The site no longer starts with an empty GPS station map and does not require the student to obtain the starter data.** On first render it displays a bundled, cited EarthScope/UNAVCO teaching example containing two real California stations from the teacher guide *Exploring plate motion and deformation in California with GPS*, version **14 May 2022**, pp. 5–6:
++
++| Station | Latitude (°N) | Longitude (°E) | East (mm/yr) | North (mm/yr) | Frame |
++| --- | ---: | ---: | ---: | ---: | --- |
++| SBCC | 33.553 | -117.661 | approximately -26.1 | approximately 27.3 | NAM14 |
++| BEMT | 34.001 | -115.998 | approximately -4.0 | approximately 4.6 | NAM14 |
++
++*Original source:* https://cdn.serc.carleton.edu/files/NAGTWorkshops/geodesy/activities/california-teacher-guide.v2.pdf (teacher answer pages 5–6); the guide explicitly uses **N. America, NAM14, UNAVCO**. These are **rounded classroom time-series slope estimates**, **not** modern final-network solutions. The date is the **publication/revision date of the lesson**; its station-processing/reference epoch and uncertainties **are not reported**. That caveat is visible in the application, in the CSV's `epoch` text and in the reference archive. Do **not** report 2022-05-14 as the GNSS measurement epoch.
++
++In parallel, when the exhibit runs on a server with outbound HTTPS access, the new `/api/gnss` server route attempts to download EarthScope's **official CWU final NAM14 velocity product**:
++
++https://data.earthscope.org/archive/gnss/products/velocity/cwu.final_nam14.vel
++
++If it responds with a valid velocity file, the app automatically replaces the two-station demonstration with a regional, uncertainty-screened sample of the **actual official station solutions**, showing per-station first/last observation epochs, file release date, retrieval time, east and north mm/yr and N/E standard errors. The parser supports the **2013+ v1.1.0 format with 30 columns** and historical **v1.0.1 with 27 columns**. Source velocities/uncertainties in **m/yr** are explicitly multiplied by 1,000. Coordinates are normalized for 0–360° longitude, limited to 32–41°N and 125–115°W, and filtered to ≤2 mm/yr per horizontal standard error, reflecting the viewer's filter. To limit SVG DOM size, at most 240 deduplicated station rows are rendered in a deterministic subsample; the complete unmodified network file remains at the source URL.
++
++If EarthScope cannot be contacted, the **two measured example stations remain visible**, alongside a transparent archive-unavailable warning. No scientific measurements are invented. This environment's DNS/network restriction meant **the production file could not be retrieved and an end-to-end live API test was not possible**; the parser has fixture-based regression tests but deployment still needs a live check.
++
++You can display/download loaded stations, refresh the official product, or import a separately verified station file with the same frame and schema:
+ 
+ `site,lat,lon,ve_mm_yr,vn_mm_yr,reference_frame,epoch`
+ 
+-Velocities must be in east and north millimetres per year, in the same reference frame. Upload validates the seven-column schema, numbers, coordinates and frame consistency. Example rows with invented measured velocities are explicitly **not** shipped. The display vector arrow length is scaled for clarity; data values retain their reported units.
++Import validates seven columns, numeric values, coordinates, duplicate station IDs and common reference frame; it does **not** independently authenticate a user-supplied CSV. Arrow lengths are diagrammatically scaled, but values retain their real units. The bundled snapshot is also directly accessible at `public/data/earthscope-california-teaching-nam14-2022.csv`. The source data should be attributed in accordance with EarthScope/NGF's data terms.
+ 
+ ### Geological / topographic evidence
+ 
+@@ -68,15 +90,15 @@ Structural response is schematic, with no calculated amplification, acceleration
+ ## Academic submission blockers
+ 
+ 1. Fill out **all** `[INSERT YOUR VERIFIED RESEARCH HERE: ...]` slots in `src/content/story.ts` with **student-authored** geological interpretation, including parenthetical author–year citations.
+-2. Supply verified, timestamped and reproducible GNSS and geological datasets with source/figure use rights. Consider bundling a dated USGS earthquake snapshot with its exact query. Explain observed vs model-based vs illustrative.
++2. The GNSS panel now includes two verified **approximate teaching-guide** velocities and an automatic official EarthScope adapter. Before academic submission, verify the live CWU NAM14 download on the deployment, record the chosen official file release and observation epochs, archive a reproducible full GNSS snapshot if needed, and supply verified geological GIS data and figure permissions. Consider bundling a dated USGS quake snapshot with its exact query. Explain observed vs model-based vs illustrative.
+ 3. Verify and finalize APA 7 references, figure credits/permission and any data values. There are four peer-reviewed pointers and multiple provider sources in the registry, but it still needs the student's full reference review.
+ 4. Audit **all visible and alternate-state** text plus the reference drawer against the assignment's **1,200-word ceiling**. The footer reports the visible DOM estimate for current chapter state; `npm run check:words` reports a conservative source-string inventory, **not** a certification that the ceiling is met.
+ 5. Independently complete and sign the university PDF cover sheet and AI declaration, and record the required 60-second narration. Confirm the permitted extent of AI-generated code with the lecturer; do not claim all scientific text was student-written until reviewed.
+-6. Install dependencies and run build, keyboard, reduced-motion, mobile, API-error and browser checks on a machine that can reach npm and, for live quake data, USGS.
++6. Install dependencies and run build, keyboard, reduced-motion, mobile, API-error and browser checks on a machine that can reach npm, USGS and the EarthScope archive. `npm run check:gnss` runs the parser regression suite.
+ 
+ ## Applying the delivery patch
+ 
+-The patch was generated against the exact extracted `New folder/` contents of `san andrease gemini output.rar`. To reconstruct the converted project rather than use the full ZIP:
++The **original v0→Next.js conversion patch** was generated against the exact extracted `New folder/` contents of `san andrease gemini output.rar`. To reconstruct the converted project rather than use the full ZIP:
+ 
+ ```bash
+ # from the root containing the original app.js, index.html, README.md and styles.css
+@@ -88,3 +110,16 @@ npm run build
+ ```
+ 
+ The patch includes moves into `legacy-v0/`, all new Next.js project files and this README. The complete converted ZIP is an alternative to applying the patch. **Never apply this patch over a different v0 export.**
++
++## GNSS correction / incremental handoff (5 November 2026)
++
++The earlier Next.js ZIP incorrectly left the GNSS panel empty. This correction modifies that handoff, adds an offline source-backed sample, integrates a server-side official EarthScope data adapter, preserves the bibliography and adds parser checks. To apply **`project-san-andreas-gnss-fix.patch`**, start from the **earlier `project-san-andreas-nextjs-handoff.zip`**, not the original Gemini vanilla-JS RAR; or simply use the latest complete `project-san-andreas-gnss-fixed.zip` archive.
++
++```bash
++# Run from the root of the EARLIER Next.js handoff (not the Gemini v0)
++git apply --check project-san-andreas-gnss-fix.patch
++git apply project-san-andreas-gnss-fix.patch
++npm install
++npm run check:gnss
++npm run build
++```
+diff --git a/VERIFICATION.md b/VERIFICATION.md
+index 073cf5c..8525072 100644
+--- a/VERIFICATION.md
++++ b/VERIFICATION.md
+@@ -6,16 +6,17 @@
+ - Interaction controls: state-driven selectors, pointer/keyboard inputs and reduced-motion-aware animations in all five chapters.
+ - Research integrity: student interpretations remain placeholders; arbitrary predictive magnitude, friction, strain and site amplification widgets from old v0 were not migrated.
+ - Seismicity: USGS FDSN API route implemented with query metadata and unavailable state. **Not live-tested** in this offline environment.
+-- GNSS: CSV parser and station-vector plotting implemented; **no measured dataset included**.
++- GNSS correction: **two sourced EarthScope/UNAVCO 2022 teacher-guide station estimates included offline** (SBCC, BEMT, rounded and explicitly qualified), with NAM14 frame and approximate mm/yr velocities, teaching-guide version and unknown true measurement epochs stated. On running Next.js, the app attempts to replace them automatically with the official EarthScope CWU final NAM14 `.vel` network product via `/api/gnss`; an upstream failure retains the published stations. **Official remote file not reachable/tested here.**
+ - Geology: source links and conceptual demonstration; **real geological GIS dataset not yet embedded**.
+ - Paleo: illustrations clearly non-reconstruction; **scientifically verified model unavailable**.
+ - Malaysia: qualitative interactive comparison only; formal site hazard or code compliance unverified.
+ - `node scripts/check-source.mjs`: passed.
++- `NODE_PATH="$(npm root -g)" node scripts/test-gnss.mjs`: passed against the locally installed TypeScript compiler. After dependency install, use `npm run check:gnss`. Tests cover real published teaching CSV values and fabricated **test-only** .vel records in both official historical/current layouts (not displayed as measurements), units, frame, sigma, epochs, duplicates and rejection of non-data responses.
+ - `node --check` JS helper scripts: passed.
+ - TypeScript compiler `transpileModule` TS/TSX syntax check: passed (0 parser errors). **Not equivalent to full typecheck.**
+ - `npm install` / Next.js build / browser test: BLOCKED — npm registry DNS EAI_AGAIN, no dependency cache.
+ - npm lockfile: NOT PROVIDED, must be generated with `npm install` on networked host before reproducible deployment.
+ - Word limit: not verified against all states; see README; count visible and alternate states before submission.
+-- Patch: generated and checked against original extracted RAR with `git apply --check`; result provided separately.
++- Original conversion patch: generated against the v0 RAR; **GNSS incremental patch** separately generated against the previous Next.js handoff and checked against it with `git apply --check`.
+ 
+ Academic deliverables not generated: student research interpretations, complete data/captions, AI declaration and signed cover sheet, self-narrated 60-second walkthrough.
+diff --git a/app/api/gnss/route.ts b/app/api/gnss/route.ts
+new file mode 100644
+index 0000000..4fab2cb
+--- /dev/null
++++ b/app/api/gnss/route.ts
+@@ -0,0 +1,20 @@
++import { NextResponse } from "next/server";
++import { earthscopeNam14Url, parseEarthscopeVelocityField } from "@/src/data/earthscope-vel";
++
++export const runtime = "nodejs";
++export const dynamic = "force-dynamic";
++
++export async function GET() {
++  try {
++    const response = await fetch(earthscopeNam14Url, { cache: "no-store", signal: AbortSignal.timeout(12000), headers: { Accept: "text/plain" } });
++    if (!response.ok) throw new Error(`Archive returned HTTP ${response.status}`);
++    const size = Number(response.headers.get("content-length") || 0);
++    if(size > 15_000_000) throw new Error("Archive file exceeded the configured size limit");
++    const text = await response.text();
++    if(text.length > 15_000_000) throw new Error("Archive file exceeded the configured size limit");
++    const parsed = parseEarthscopeVelocityField(text);
++    return NextResponse.json({ ...parsed, sourceUrl: earthscopeNam14Url, retrievedAt: new Date().toISOString(), referenceFrame: "NAM14", unit: "mm/yr", processingCenter: "CWU", solution: "final" });
++  } catch (e) {
++    return NextResponse.json({error: e instanceof Error ? e.message : "GNSS archive unavailable", sourceUrl: earthscopeNam14Url}, {status: 503});
++  }
++}
+diff --git a/components/EvidenceDesk.tsx b/components/EvidenceDesk.tsx
+index f0174b7..3396c87 100644
+--- a/components/EvidenceDesk.tsx
++++ b/components/EvidenceDesk.tsx
+@@ -1,8 +1,10 @@
+ "use client";
+-import { useCallback, useEffect, useMemo, useState } from "react";
++import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+ import { Download, RefreshCw, Upload, Activity, Navigation2, Mountain } from "lucide-react";
+ import { earthquakeArchive, gnssCsvHeader, parseGnssCsv, type GnssRecord, type Quake } from "@/src/data/evidence";
+ import { story } from "@/src/content/story";
++import { earthscopeTeachingRows, earthscopeTeachingMetadata } from "@/src/data/gnss-teaching";
++import { earthscopeNam14Url } from "@/src/data/earthscope-vel";
+ import { SectionHeading, SourceLabel, ResearchSlot, FieldStatus, ScientificFigure } from "./Shared";
+ 
+ type Tab = "seismicity" | "geodesy" | "geology";
+@@ -14,7 +16,14 @@ const projectX = (lon: number) => 45+(lon+125)*60;
+ const projectY = (lat: number) => 355-(lat-32)*(328/9);
+ export function EvidenceDesk() {
+   const [tab,setTab] = useState<Tab>("seismicity"); const [catalog,setCatalog] = useState<CatalogState>("loading");const [quakes,setQuakes] = useState<Quake[]>([]);const [retrievedAt,setRetrievedAt] = useState("");const [requestUrl,setRequestUrl] = useState("");
+-  const [mag,setMag] = useState(3);const [depth,setDepth] = useState(40);const [gnss,setGnss] = useState<GnssRecord[]>([]);const [gnssError,setGnssError]=useState("");const [showVectors,setShowVectors]=useState(true);const [chosenSite,setChosenSite]=useState("");const [offset,setOffset]=useState(48);
++  const [mag,setMag] = useState(3);const [depth,setDepth] = useState(40);const [gnss,setGnss] = useState<GnssRecord[]>(earthscopeTeachingRows);
++  const [gnssError,setGnssError]=useState("");const [showVectors,setShowVectors]=useState(true);const [chosenSite,setChosenSite]=useState("SBCC");
++  const [gnssSource,setGnssSource] = useState<"snapshot"|"archive"|"imported">("snapshot");
++  const [gnssLoading,setGnssLoading] = useState(false);
++  const [archiveRelease,setArchiveRelease] = useState("");
++  const [archiveRetrieved,setArchiveRetrieved] = useState("");
++  const [archiveTotal,setArchiveTotal] = useState(0);
++  const importedOverride = useRef(false);const [offset,setOffset]=useState(48);
+   const loadQuakes = useCallback(async () => {
+     setCatalog("loading");
+     try {
+@@ -33,18 +42,66 @@ export function EvidenceDesk() {
+   },[]);
+   useEffect(()=>{void loadQuakes();},[loadQuakes]);
+   const filtered=useMemo(()=>quakes.filter(q=>q.magnitude>=mag && q.depth>=0 && q.depth<=depth && q.lon>=-125&&q.lon<=-115&&q.lat>=32&&q.lat<=41),[quakes,mag,depth]);
++  const loadOfficialGnss = useCallback(async () => {
++    importedOverride.current = false;
++    setGnssLoading(true);setGnssError("");
++    try {
++      const response = await fetch("/api/gnss",{cache:"no-store"});
++      const payload = await response.json();
++      if(!response.ok || !Array.isArray(payload.rows) || !payload.rows.length || payload.referenceFrame!=="NAM14")
++        throw new Error(payload.error || "EarthScope NAM14 source unavailable");
++      if(!importedOverride.current) {
++        const rows = payload.rows as GnssRecord[];
++        if(rows.some(r=>r.referenceFrame!=="NAM14" || !Number.isFinite(r.ve) || !Number.isFinite(r.vn)))
++          throw new Error("Invalid official station values");
++        setGnss(rows);setChosenSite(rows[0].site);setGnssSource("archive");
++        setArchiveRelease(payload.releaseDate);setArchiveRetrieved(payload.retrievedAt);setArchiveTotal(payload.allRegionalSites);
++      }
++    } catch (error) {
++      if(!importedOverride.current)
++        setGnssError(`EarthScope archive inaccessible; the published 2022 two-station teaching snapshot remains available. ${error instanceof Error?error.message:""}`);
++    } finally { setGnssLoading(false); }
++  },[]);
++  useEffect(()=>{void loadOfficialGnss();},[loadOfficialGnss]);
+   async function loadGnssFile(file?:File) {
+     if(!file)return;
+     setGnssError("");
+-    try {const rows=parseGnssCsv(await file.text());setGnss(rows);setChosenSite(rows[0].site);} catch(e){setGnss([]);setGnssError(e instanceof Error?e.message:"Unreadable file");}
++    try {const rows=parseGnssCsv(await file.text());importedOverride.current=true;setGnss(rows);setChosenSite(rows[0].site);setGnssSource("imported");} catch(e){setGnssError(e instanceof Error?e.message:"Unreadable file");}
+   }
+   function downloadTemplate(){const blob=new Blob([gnssCsvHeader+"\n"],{type:"text/csv"});const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;link.download="gnss-verified-stations-template.csv";link.click();URL.revokeObjectURL(url);}
++  function downloadLoadedGnss() {
++    const lines=[gnssCsvHeader,...gnss.map(r=>[r.site,r.lat,r.lon,r.ve,r.vn,r.referenceFrame,r.epoch].join(","))];
++    const blob=new Blob([lines.join("\n")+"\n"],{type:"text/csv"});
++    const url=URL.createObjectURL(blob);const link=document.createElement("a");link.href=url;
++    link.download=`gnss-${gnssSource}-${selectedGnss?.referenceFrame?.toLowerCase()||"stations"}.csv`;link.click();URL.revokeObjectURL(url);
++  }
+   const selectedGnss=gnss.find(r=>r.site===chosenSite)||gnss[0];
+   return <section id="evidence" className="chapter chapter-paper" data-chapter><SectionHeading number="03" label="OBSERVATION VS MODEL" title="The Evidence Layer" summary="Three independent lines of investigation. Measured records are kept separate from visual explanations."/>
+     <div className="evidence-tabs" role="tablist" aria-label="Evidence datasets">{(["seismicity","geodesy","geology"] as Tab[]).map((t,i)=><button key={t} role="tab" aria-selected={tab===t} className={tab===t?"active":""} onClick={()=>setTab(t)}>{i===0?<Activity size={17}/>:i===1?<Navigation2 size={17}/>:<Mountain size={17}/>}<span>0{i+1}</span>{t==="seismicity"?"SEISMICITY":t==="geodesy"?"GPS / GEODESY":"GEOLOGICAL TRACES"}</button>)}</div>
+     {tab==="seismicity"&&<div role="tabpanel" className="evidence-body"><div className="evidence-visual"><div className="panel-heading"><span>USGS / CALIFORNIA REGIONAL CATALOG</span>{catalog==="ready"?<FieldStatus kind="good">DATA RECEIVED</FieldStatus>:catalog==="loading"?<FieldStatus>FETCHING CATALOG</FieldStatus>:<FieldStatus kind="warn">OFFLINE / UNAVAILABLE</FieldStatus>}</div><ScientificFigure figure="03-A" description="USGS ComCat epicentres positioned by reported latitude/longitude. Area includes multiple fault systems; not all events lie on the San Andreas."><GeographicGrid>{filtered.map(q=><circle key={q.id} cx={projectX(q.lon)} cy={projectY(q.lat)} r={2.2+Math.max(0,q.magnitude-2)*1.65} fill="#8E3C32" fillOpacity=".64" stroke="#6b2f28" strokeWidth=".5"><title>{`M${q.magnitude} · ${q.depth} km · ${q.place} · ${q.time}`}</title></circle>)}</GeographicGrid></ScientificFigure><div className="dataset-footer"><span>{catalog==="ready"?`${filtered.length} of ${quakes.length} returned events visible`:"No measurements shown without a valid source response"}</span><SourceLabel id="usgs-comcat">DATA PROVENANCE</SourceLabel></div></div>
+       <aside className="evidence-sidebar"><p className="eyebrow">STREAM 01 / SEISMICITY</p><h3>Where the Earth breaks.</h3><p className="body-copy">Use magnitude and hypocentre depth to inspect a dated regional earthquake sample.</p><div className="control-unit"><div className="control-label"><label htmlFor="quake-magnitude">MINIMUM MAGNITUDE</label><output>M {mag.toFixed(1)}</output></div><input id="quake-magnitude" type="range" min="2" max="6" step=".5" value={mag} onChange={e=>setMag(Number(e.target.value))}/></div><div className="control-unit"><div className="control-label"><label htmlFor="quake-depth">MAXIMUM DEPTH</label><output>{depth} km</output></div><input id="quake-depth" type="range" min="5" max="100" step="5" value={depth} onChange={e=>setDepth(Number(e.target.value))}/></div><div className="depth-distribution" aria-label="Observed depth distribution by ten-kilometre bins"><b>DEPTH DISTRIBUTION / OBSERVED EVENTS</b><svg viewBox="0 0 300 90" role="img" aria-label="Histogram of catalog depths for the current magnitude filter">{Array.from({length:10},(_,i)=>{const count=quakes.filter(q=>q.magnitude>=mag && q.depth>=i*10 && q.depth<(i+1)*10).length;const max=Math.max(1,...Array.from({length:10},(_,j)=>quakes.filter(q=>q.magnitude>=mag && q.depth>=j*10 && q.depth<(j+1)*10).length));return <g key={i}><rect x={8+i*29} y={74-(count/max)*60} width="20" height={(count/max)*60} fill={i*10<depth?"#8E3C32":"#aaa18d"}><title>{`${i*10}–${(i+1)*10} km: ${count} reported events`}</title></rect><text x={8+i*29} y="86" fontSize="8" fill="#756c60">{i*10}</text></g>})}</svg><small>Depth (km). Counts reflect the USGS response, not a complete regional census.</small></div><div className="dataset-metadata"><b>DATA WINDOW</b><span>{earthquakeArchive.start} — {earthquakeArchive.end}</span><b>RETRIEVED (UTC)</b><span>{retrievedAt||"Awaiting source"}</span><b>QUERY</b><span>32–41°N, 125–115°W · up to {earthquakeArchive.maximumResults} newest events</span></div><button className="outline-action" onClick={()=>void loadQuakes()}><RefreshCw size={14}/> RETRY SOURCE</button>{requestUrl&&<a className="small-link" href={requestUrl} target="_blank" rel="noreferrer">Open exact query ↗</a>}{catalog==="unavailable"&&<p className="data-error" role="status">The USGS API could not be reached. No artificial events were substituted.</p>}</aside></div>}
+-    {tab==="geodesy"&&<div role="tabpanel" className="evidence-body"><div className="evidence-visual"><div className="panel-heading"><span>EARTHSCOPE / VERIFIED STATION IMPORT</span><FieldStatus kind={gnss.length?"good":"warn"}>{gnss.length?`${gnss.length} RECORDS LOADED`:"NO STATIONS LOADED"}</FieldStatus></div><ScientificFigure figure="03-B" description="GNSS station positions and horizontal vectors appear only after importing a documented CSV. Arrow length is display-scaled; source rates remain in mm/yr."><GeographicGrid>{gnss.map(r=><g key={r.site}><circle cx={projectX(r.lon)} cy={projectY(r.lat)} r="4" fill="#536c61"/>{showVectors&&<path d={`M${projectX(r.lon)} ${projectY(r.lat)} l${Math.max(-70,Math.min(70,r.ve*1.15))} ${Math.max(-70,Math.min(70,-r.vn*1.15))}`} stroke="#8E3C32" strokeWidth="2.6" fill="none"/>}<title>{`${r.site}: E ${r.ve}, N ${r.vn} mm/yr (${r.referenceFrame}; ${r.epoch})`}</title></g>)}</GeographicGrid></ScientificFigure><div className="dataset-footer"><span>{gnss.length?"Imported values; provenance must be checked by student":"Empty state is intentional: no invented station measurements"}</span><SourceLabel id="earthscope">STATION SOURCE</SourceLabel></div></div><aside className="evidence-sidebar"><p className="eyebrow">STREAM 02 / GEODESY</p><h3>Measure the slow motion.</h3><p className="body-copy">Import EarthScope-derived velocities and keep reference frame, date and units attached.</p><label className="upload-control"><Upload size={16}/> IMPORT VERIFIED CSV<input type="file" accept=".csv,text/csv" onChange={e=>void loadGnssFile(e.target.files?.[0])}/></label><button className="outline-action" onClick={downloadTemplate}><Download size={14}/> DOWNLOAD CSV TEMPLATE</button><label className="check-row"><input type="checkbox" checked={showVectors} onChange={e=>setShowVectors(e.target.checked)} /> Velocity vectors</label>{gnss.length>0&&<><label className="control-unit">STATION<select value={chosenSite} onChange={e=>setChosenSite(e.target.value)}>{gnss.map(r=><option key={r.site} value={r.site}>{r.site}</option>)}</select></label>{selectedGnss&&<div className="dataset-metadata"><b>VE / VN</b><span>{selectedGnss.ve} / {selectedGnss.vn} mm/yr</span><b>REFERENCE FRAME</b><span>{selectedGnss.referenceFrame}</span><b>EPOCH / VERSION</b><span>{selectedGnss.epoch}</span></div>}</>}{gnssError&&<p className="data-error" role="alert">{gnssError}</p>}<div className="model-caution"><b>IMPORT CONTRACT</b><p>site, lat, lon, east and north velocities (mm/yr), reference frame, epoch. Do not mix frames.</p></div></aside></div>}
++    {tab==="geodesy"&&<div role="tabpanel" className="evidence-body">
++      <div className="evidence-visual">
++        <div className="panel-heading"><span>GNSS / NORTH AMERICA-FIXED NAM14</span><FieldStatus kind={gnssSource==="archive"?"good":"warn"}>{gnssSource==="archive"?"EARTHSCOPE FINAL PRODUCT":gnssSource==="snapshot"?"PUBLISHED TEACHING SNAPSHOT":"CUSTOM CSV IMPORT"}</FieldStatus></div>
++        <ScientificFigure figure="03-B" description={`Real station vectors (${gnssSource==="snapshot"?"published rounded 2022 NAM14 estimates":gnssSource==="archive"?"EarthScope CWU final NAM14 velocity file":"imported station CSV"}); direction follows measured N/E components. Vector length is screen-scaled, not geographic distance.`}>
++          <GeographicGrid>{gnss.map(r=>{const x=projectX(r.lon);const y=projectY(r.lat);const dx=Math.max(-65,Math.min(65,r.ve*1.15));const dy=Math.max(-65,Math.min(65,-r.vn*1.15));return <g key={r.site}><circle cx={x} cy={y} r="4.5" fill="#536c61" stroke="#f1ebdf" strokeWidth="1"/>{showVectors&&<><path d={`M${x} ${y} l${dx} ${dy}`} stroke="#8E3C32" strokeWidth="2.6" fill="none" strokeLinecap="round"/><circle cx={x+dx} cy={y+dy} r="2.5" fill="#8E3C32"/></>}{(gnssSource==="snapshot"||gnss.length<=35)&&<text x={x+8} y={y-7} fontSize="11" fill="#253f36">{r.site}</text>}<title>{`${r.site}: E ${r.ve}, N ${r.vn} mm/yr; ${r.referenceFrame}; ${r.epoch}${r.estimated?" (rounded published estimate)":""}`}</title></g>;})}</GeographicGrid>
++        </ScientificFigure>
++        <div className="dataset-footer"><span>{gnss.length} actual sourced station rows {gnssSource==="archive"?`(subsample of ${archiveTotal} regional quality-filtered sites)` : gnssSource==="snapshot"?"(rounded from EarthScope teaching guide)":"(user-imported; origin not independently verified)"}</span><SourceLabel id={gnssSource==="snapshot"?"earthscope-teaching":"earthscope"}>EARTHSCOPE SOURCE</SourceLabel></div>
++      </div>
++      <aside className="evidence-sidebar"><p className="eyebrow">STREAM 02 / GEODESY</p><h3>Measure the slow motion.</h3>
++        <p className="body-copy">NAM14 measures station movement relative to stable North America. Official archive records load automatically when available; a dated published two-station example is bundled offline.</p>
++        <button className="outline-action" onClick={()=>void loadOfficialGnss()} disabled={gnssLoading}><RefreshCw size={14}/> {gnssLoading?"CONTACTING EARTHSCOPE…":"REFRESH OFFICIAL NAM14"}</button>
++        <button className="outline-action" onClick={downloadLoadedGnss}><Download size={14}/> DOWNLOAD DISPLAYED STATIONS</button>
++        <label className="upload-control"><Upload size={16}/> IMPORT ANOTHER VERIFIED CSV<input type="file" accept=".csv,text/csv" onChange={e=>void loadGnssFile(e.target.files?.[0])}/></label>
++        <button className="outline-action" onClick={downloadTemplate}><Download size={14}/> DOWNLOAD CSV TEMPLATE</button>
++        <label className="check-row"><input type="checkbox" checked={showVectors} onChange={e=>setShowVectors(e.target.checked)}/> Velocity vectors</label>
++        <label className="control-unit">STATION<select value={chosenSite} onChange={e=>setChosenSite(e.target.value)}>{gnss.map(r=><option key={r.site} value={r.site}>{r.site}</option>)}</select></label>
++        {selectedGnss&&<div className="dataset-metadata"><b>VE / VN · MM/YR</b><span>{selectedGnss.ve.toFixed(2)} / {selectedGnss.vn.toFixed(2)} {selectedGnss.estimated?"(approx.)":""}</span><b>HORIZONTAL SPEED</b><span>{Math.hypot(selectedGnss.ve,selectedGnss.vn).toFixed(1)} mm/yr</span><b>REFERENCE FRAME</b><span>{selectedGnss.referenceFrame}</span><b>DATA EPOCH / VERSION</b><span>{selectedGnss.epoch}</span>{selectedGnss.northSigmaMmYr!==undefined&&<><b>N / E 1σ</b><span>{selectedGnss.northSigmaMmYr} / {selectedGnss.eastSigmaMmYr} mm/yr</span></>}{gnssSource==="archive"&&<><b>FILE RELEASE / UTC RETRIEVAL</b><span>{archiveRelease} / {archiveRetrieved}</span></>}{gnssSource==="snapshot"&&<><b>PUBLICATION DATE</b><span>{earthscopeTeachingMetadata.published}; values rounded from teaching plots</span></>}</div>}
++        <a className="small-link" href={gnssSource==="snapshot"?earthscopeTeachingMetadata.sourceUrl:gnssSource==="archive"?earthscopeNam14Url:"https://www.unavco.org/data/gps-gnss/derived-products/derived-products.html"} target="_blank" rel="noreferrer">Open the source documentation ↗</a>
++        {gnssError&&<p className="data-error" role="status">{gnssError}</p>}
++        <div className="model-caution"><b>PROVENANCE / INTERPRETATION</b><p>{gnssSource==="snapshot"?"Two published EarthScope/UNAVCO classroom slope estimates (14 May 2022), rounded to about 0.1 mm/yr. They are not a current official velocity solution; no processing epoch or formal uncertainty was supplied in the guide.":gnssSource==="archive"?"EarthScope CWU final NAM14 network; N/E values converted from metres/year to millimetres/year. Horizontal uncertainty screening ≤ 2 mm/yr. Do not compare with IGS14 without frame transformation.":"Imported values have passed format checks, not source authentication. Keep the frame, collection interval, processing version and citation alongside the CSV."}</p></div>
++      </aside>
++    </div>}
+     {tab==="geology"&&<div role="tabpanel" className="evidence-body"><div className="evidence-visual"><div className="panel-heading"><span>WALLACE CREEK / OFFSET DEMONSTRATION</span><FieldStatus>ILLUSTRATIVE / NO GIS IMPORT</FieldStatus></div><ScientificFigure figure="03-C" description="Original stylized stream-offset illustration inspired by published field observations, not a survey image or measured caliper."><svg className="offset-illustration" viewBox="0 0 700 390" role="img" aria-label="Conceptual right-lateral displacement of stream crossing the fault"><rect width="700" height="390" fill="#d3c8ac"/><path d="M0 118 140 105 270 154 350 146 465 101 700 142" stroke="#8d977e" strokeWidth="48" fill="none" opacity=".48"/><path d={`M32 ${105+(offset-50)*1.25} C140 ${128+(offset-50)*1.25} 210 ${95+(offset-50)*1.25} 340 ${178+(offset-50)*1.25}`} stroke="#567a79" strokeWidth="16" fill="none"/><path d={`M360 ${178-(offset-50)*1.25} C455 ${250-(offset-50)*1.25} 540 ${236-(offset-50)*1.25} 675 ${305-(offset-50)*1.25}`} stroke="#567a79" strokeWidth="16" fill="none"/><path d="M350 0V390" stroke="#8E3C32" strokeDasharray="11 7" strokeWidth="4"/><g className="geo-label"><text x="25" y="34">SCHEMATIC STREAM</text><text x="384" y="34">ILLUSTRATIVE OFFSET</text><text x="354" y="365">FAULT</text></g></svg></ScientificFigure><div className="dataset-footer"><span>Actual mapped traces must come from USGS GIS or a cited survey.</span><SourceLabel id="usgs-faults">USGS FAULT DATABASE</SourceLabel></div></div><aside className="evidence-sidebar"><p className="eyebrow">STREAM 03 / FIELD GEOLOGY</p><h3>The landscape keeps a record.</h3><p className="body-copy">Offset channels and mapped faults offer a geological line of evidence, independent of earthquake catalogs.</p><SourceLabel id="sieh1984">WALLACE CREEK / SIEH &amp; JAHNS</SourceLabel><div className="control-unit"><div className="control-label"><label htmlFor="geology-offset">VISUAL ALIGNMENT</label><output>DEMO ONLY</output></div><input type="range" id="geology-offset" min="0" max="100" value={offset} onChange={e=>setOffset(Number(e.target.value))}/></div><div className="model-caution"><b>NOT A MEASUREMENT</b><p>Slider units are arbitrary. No displacement age or slip rate is inferred.</p></div></aside></div>}
+     <div className="bottom-research"><b>STUDENT EVIDENCE SYNTHESIS</b><ResearchSlot>{story.evidence.synthesis}</ResearchSlot></div>
+   </section>;
+diff --git a/package.json b/package.json
+index e27969c..a4a94bf 100644
+--- a/package.json
++++ b/package.json
+@@ -8,7 +8,8 @@
+     "start": "next start",
+     "typecheck": "tsc --noEmit",
+     "check:words": "node scripts/count-words.mjs",
+-    "check:source": "node scripts/check-source.mjs"
++    "check:source": "node scripts/check-source.mjs",
++    "check:gnss": "node scripts/test-gnss.mjs"
+   },
+   "dependencies": {
+     "next": "15.5.6",
+diff --git a/public/data/earthscope-california-teaching-nam14-2022.csv b/public/data/earthscope-california-teaching-nam14-2022.csv
+new file mode 100644
+index 0000000..c1e8484
+--- /dev/null
++++ b/public/data/earthscope-california-teaching-nam14-2022.csv
+@@ -0,0 +1,3 @@
++site,lat,lon,ve_mm_yr,vn_mm_yr,reference_frame,epoch
++SBCC,33.553,-117.661,-26.1,27.3,NAM14,not reported; 2022-05-14 guide date
++BEMT,34.001,-115.998,-4.0,4.6,NAM14,not reported; 2022-05-14 guide date
+diff --git a/scripts/test-gnss.mjs b/scripts/test-gnss.mjs
+new file mode 100644
+index 0000000..72bfc3c
+--- /dev/null
++++ b/scripts/test-gnss.mjs
+@@ -0,0 +1,73 @@
++#!/usr/bin/env node
++// Parser regression tests, including the published v1.1.0 and historical v1.0.1
++// UNAVCO .vel layouts. TEST ONLY: rows below are fabricated parser fixtures,
++// not scientific measurements and are never included in the browser dataset.
++import assert from "node:assert/strict";
++import fs from "node:fs";
++import Module from "node:module";
++import { createRequire } from "node:module";
++import path from "node:path";
++import { fileURLToPath } from "node:url";
++
++const require=createRequire(import.meta.url);
++const ts=require("typescript");
++const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
++function loadTs(relativePath) {
++  const file=path.join(root,relativePath);
++  const src=fs.readFileSync(file,"utf8");
++  const {outputText,diagnostics}=ts.transpileModule(src, {
++    fileName:file, reportDiagnostics:true,
++    compilerOptions:{module:ts.ModuleKind.CommonJS, target:ts.ScriptTarget.ES2022}
++  });
++  assert.equal(diagnostics?.length,0,`TS syntax: ${relativePath}`);
++  const m=new Module(file);m.filename=file;m.paths=Module._nodeModulePaths(path.dirname(file));
++  m._compile(outputText,file);
++  return m.exports;
++}
++const {parseEarthscopeVelocityField}=loadTs("src/data/earthscope-vel.ts");
++const {parseGnssCsv}=loadTs("src/data/evidence.ts");
++const csv=fs.readFileSync(path.join(root,"public/data/earthscope-california-teaching-nam14-2022.csv"),"utf8");
++const sample=parseGnssCsv(csv);
++assert.equal(sample.length,2);
++assert.equal(sample[0].site,"SBCC");
++assert.equal(sample[0].ve,-26.1);
++assert.equal(sample[0].vn,27.3);
++assert.equal(sample[1].site,"BEMT");
++assert.equal(sample[1].vn,4.6);
++assert.equal(sample[0].referenceFrame,"NAM14");
++assert.match(sample[0].epoch,/not reported/);
++assert.throws(()=>parseGnssCsv(csv.replace("BEMT,","SBCC,")),/Duplicate/);
++assert.throws(()=>parseGnssCsv(csv.replace("BEMT,34.001,-115.998,-4.0,4.6,NAM14,","BEMT,34.001,-115.998,-4.0,4.6,IGS14,")),/Do not mix/);
++
++// Format v1.1.0 columns: site name refEpoch refJday X Y Z lat lon height
++// dX dY dZ SX SY SZ Rxy Rxz Ryz dN dE dU SN SE SU Rne Rnu Reu first last.
++function modernRow(site, {lat=34.5, lon=240.3, north="0.01230",east="-0.02450",sigma="0.00030",last="20241001120000"}={}) {
++  const fields=[site,"ParserFixture", "20240101120000","60000.5000","-1","-2","3",String(lat),String(lon),"10", "0","0","0","0.0001","0.0001","0.0001","0","0","0",north,east,"0",sigma,"0.00040","0.00090","0","0","0","20200101120000",last];
++  assert.equal(fields.length,30);return fields.join(" ");
++}
++const header="PBO Velocity file from CWU_Archive Reference Frame : NOAM_I14\nFormat Version: 1.1.0\nRelease Date  : 20241002000000\nStart Field Description\n";
++const modern= parseEarthscopeVelocityField(header+modernRow("TST1")+"\n"+modernRow("TST2",{lat:45})+"\n"+modernRow("TST3",{sigma:"0.00300"}));
++assert.equal(modern.rows.length,1,"out-of-area and >2 mm/yr sigma excluded");
++assert.equal(modern.rows[0].site,"TST1");
++assert.equal(modern.rows[0].lat,34.5);
++assert.ok(Math.abs(modern.rows[0].lon+119.7)<1e-10);
++assert.equal(modern.rows[0].ve,-24.5);
++assert.equal(modern.rows[0].vn,12.3);
++assert.equal(modern.rows[0].northSigmaMmYr,0.3);
++assert.equal(modern.rows[0].eastSigmaMmYr,0.4);
++assert.equal(modern.rows[0].epoch,"2020-01-01 to 2024-10-01");
++assert.equal(modern.releaseDate,"2024-10-02");
++assert.equal(modern.allRegionalSites,1);
++const later=parseEarthscopeVelocityField(header+modernRow("TST1")+"\n"+modernRow("TST1",{north:"0.015",last:"20251001120000"}));
++assert.equal(later.rows.length,1); assert.equal(later.rows[0].vn,15);
++assert.throws(()=>parseEarthscopeVelocityField(header.replace("NOAM_I14","IGS14")+modernRow("TST1")),/other than NAM14/);
++assert.throws(()=>parseEarthscopeVelocityField("<html>Access denied</html>"),/did not return/);
++
++// Historical v1.0.1: site name epoch mjd lat lon height XYZ(3) cov(6)
++// dN dE dU sigmaN sigmaE sigmaU corr(3) first last (27 fields).
++const historicFields=["TST4","TestHistoric","20230101,000000","59945","36.0","-120.0","100","0","0","0","0","0","0","0","0","0","0.009","-0.011","0","0.0002","0.0003","0.0008","0","0","0","20200101,000000","20230930,235959"];
++assert.equal(historicFields.length,27);
++const historic=parseEarthscopeVelocityField("PBO Network Velocity Field\nRelease date: 20240122 153743\n"+historicFields.join(" "));
++assert.equal(historic.rows.length,1); assert.equal(historic.rows[0].vn,9); assert.equal(historic.rows[0].ve,-11);
++assert.equal(historic.rows[0].northSigmaMmYr,0.2);
++console.log("GNSS parser tests passed: 2022 teaching CSV, modern .vel, legacy .vel, units, duplicate, frame, coordinate, uncertainty, date and invalid-file guards.");
+diff --git a/src/data/earthscope-vel.ts b/src/data/earthscope-vel.ts
+new file mode 100644
+index 0000000..2868a1c
+--- /dev/null
++++ b/src/data/earthscope-vel.ts
+@@ -0,0 +1,98 @@
++import type { GnssRecord } from "./evidence";
++
++/** EarthScope CWU final velocity solution in a North America-fixed NAM14 frame.
++ * PBO/UNAVCO .vel format version 1.1.0 (2013 onward), described in:
++ * https://www.unavco.org/data/gps-gnss/derived-products/docs/NOTICE-TO-DATA-PRODUCT-USERS-GPS-2013-03-15.pdf
++ * Historical 1.0.1 format is also supported, with a separate field layout.
++ * Horizontal rates and 1-sigma uncertainties in source .vel are METRES/YEAR.
++ */
++export const earthscopeNam14Url =
++  "https://data.earthscope.org/archive/gnss/products/velocity/cwu.final_nam14.vel";
++
++export type GnssArchive = {
++  rows: GnssRecord[];
++  releaseDate: string;
++  allRegionalSites: number;
++};
++
++function dateFromToken(raw: string): string {
++  // Modern: YYYYMMDDHHMMSS; legacy: YYYYMMDD,HHMMSS.
++  const token = raw.replace(/[,T ]/g, "");
++  if (!/^\d{8}(?:\d{5,6})?$/.test(token)) return "";
++  const year = Number(token.slice(0,4));
++  const month = Number(token.slice(4,6));
++  const day = Number(token.slice(6,8));
++  const date = new Date(Date.UTC(year, month-1, day));
++  if (date.getUTCFullYear()!==year || date.getUTCMonth()!==month-1 || date.getUTCDate()!==day) return "";
++  return `${token.slice(0,4)}-${token.slice(4,6)}-${token.slice(6,8)}`;
++}
++
++function normalizeLongitude(lon: number): number {
++  // Some historical .vel products use 0–360° east longitude.
++  return lon > 180 ? lon - 360 : lon;
++}
++
++export function parseEarthscopeVelocityField(text: string): GnssArchive {
++  if (/<!doctype html|<html\b/i.test(text.slice(0, 1000)))
++    throw new Error("Upstream did not return a .vel data file.");
++
++  const lines = text.replace(/\r/g, "").split("\n");
++  const releaseLine = lines.find(l => /release\s+date\s*:/i.test(l));
++  const releaseToken = releaseLine?.match(/release\s+date\s*:\s*(\d{8})/i)?.[1] || "";
++  const releaseDate = dateFromToken(releaseToken);
++  // Filename is explicit NAM14. Reject contradictory source frame headers.
++  const frameLine = lines.find(l=>/velocity\s+file.*reference\s+frame\s*:/i.test(l)) || "";
++  if (/\b(IGS14|IGS08|ITRF|NAM08|NOAM_I08)\b/i.test(frameLine))
++    throw new Error("Archive response declares a reference frame other than NAM14.");
++
++  // Official release files use v1.1.0 with 30 columns. Historical v1.0.1
++  // uses 27 columns; identify unambiguously by epoch format and column count.
++  const version = lines.find(l=>/format\s+version\s*:/i.test(l))?.match(/format\s+version\s*:\s*([\d.]+)/i)?.[1] || "";
++  const bySite = new Map<string, GnssRecord & {lastEpoch:string}>();
++
++  for (const line of lines) {
++    const fields=line.trim().split(/\s+/);
++    if(fields.length < 27 || !/^[A-Za-z0-9]{4}$/.test(fields[0])) continue;
++    const modern = version.startsWith("1.1") || (fields.length>=30 && /^\d{13,14}$/.test(fields[2]));
++    const legacy = !modern && fields.length >=27 && /^\d{8},\d{6}$/.test(fields[2]);
++    if(!modern && !legacy) continue;
++    if(modern && fields.length<30) continue;
++    const i = modern
++      ? {lat:7,lon:8,n:19,e:20,sn:22,se:23,first:28,last:29}
++      : {lat:4,lon:5,n:16,e:17,sn:19,se:20,first:25,last:26};
++    const [site] = fields;
++    const lat = Number(fields[i.lat]);
++    const lon = normalizeLongitude(Number(fields[i.lon]));
++    const vn = Number(fields[i.n])*1000;
++    const ve = Number(fields[i.e])*1000;
++    const northSigmaMmYr = Number(fields[i.sn])*1000;
++    const eastSigmaMmYr = Number(fields[i.se])*1000;
++    const first = dateFromToken(fields[i.first]);
++    const last = dateFromToken(fields[i.last]);
++    if(!dateFromToken(fields[2]) || !first || !last || first>last) continue;
++    if(![lat,lon,vn,ve,northSigmaMmYr,eastSigmaMmYr].every(Number.isFinite)) continue;
++    if(lat<32||lat>41||lon< -125||lon> -115) continue;
++    // The EarthScope GNSS velocity viewer screens horizontal sigmas > 2 mm/yr.
++    if(northSigmaMmYr<0||eastSigmaMmYr<0||northSigmaMmYr>2||eastSigmaMmYr>2) continue;
++    if(Math.hypot(ve,vn)>150) continue; // guard against unexpected upstream units/format
++    const next: GnssRecord & {lastEpoch:string}={
++      site,lat,lon,
++      ve:Number(ve.toFixed(3)),vn:Number(vn.toFixed(3)),
++      northSigmaMmYr:Number(northSigmaMmYr.toFixed(3)),
++      eastSigmaMmYr:Number(eastSigmaMmYr.toFixed(3)),
++      referenceFrame:"NAM14",epoch:`${first} to ${last}`,
++      sourceUrl:earthscopeNam14Url,estimated:false,lastEpoch:last,
++    };
++    const previous=bySite.get(site);
++    if(!previous||last>previous.lastEpoch)bySite.set(site,next);
++  }
++  if(!releaseDate||bySite.size===0)
++    throw new Error("No valid NAM14 station velocities in expected .vel layout or no release date.");
++  const all=[...bySite.values()].sort((a,b)=>a.site.localeCompare(b.site));
++  // Keep UI SVG responsive for large EarthScope releases; raw source is linked.
++  const stride=Math.max(1,Math.ceil(all.length/240));
++  return {
++    rows:all.filter((_,i)=>i%stride===0).map(({lastEpoch,...record})=>record),
++    releaseDate,allRegionalSites:all.length,
++  };
++}
+diff --git a/src/data/evidence.ts b/src/data/evidence.ts
+index b2b2dec..fa55d65 100644
+--- a/src/data/evidence.ts
++++ b/src/data/evidence.ts
+@@ -10,7 +10,7 @@ export const earthquakeArchive = {
+   note: "California-region catalog search, not events confirmed on the San Andreas fault."
+ };
+ export type Quake = { id: string; lat: number; lon: number; depth: number; magnitude: number; time: string; place: string };
+-export type GnssRecord = { site: string; lat: number; lon: number; ve: number; vn: number; referenceFrame: string; epoch: string };
++export type GnssRecord = { site: string; lat: number; lon: number; ve: number; vn: number; referenceFrame: string; epoch: string; sourceUrl?: string; estimated?: boolean; northSigmaMmYr?: number; eastSigmaMmYr?: number };
+ export const gnssCsvHeader = "site,lat,lon,ve_mm_yr,vn_mm_yr,reference_frame,epoch";
+ export function parseGnssCsv(text: string): GnssRecord[] {
+   const lines = text.replace(/\r/g, "").trim().split("\n");
+@@ -24,6 +24,7 @@ export function parseGnssCsv(text: string): GnssRecord[] {
+     return { site, lat: values[0], lon: values[1], ve: values[2], vn: values[3], referenceFrame, epoch };
+   });
+   if (!rows.length) throw new Error("No station rows were provided.");
++  if (new Set(rows.map(r => r.site)).size !== rows.length) throw new Error("Duplicate GNSS station IDs; choose one measurement epoch per station.");
+   if (rows.length > 500) throw new Error("Maximum 500 stations per file.");
+   if (new Set(rows.map(r => r.referenceFrame)).size > 1) throw new Error("Do not mix GNSS reference frames.");
+   return rows;
+diff --git a/src/data/gnss-teaching.ts b/src/data/gnss-teaching.ts
+new file mode 100644
+index 0000000..e46a9d4
+--- /dev/null
++++ b/src/data/gnss-teaching.ts
+@@ -0,0 +1,23 @@
++import type { GnssRecord } from "./evidence";
++
++/**
++ * Actual published, rounded classroom estimates, not synthetic site velocities.
++ * Source: Fox-Lent et al., Exploring plate motion in California with GPS,
++ * EarthScope/UNAVCO teacher version, 14 May 2022, pp. 5–6.
++ * https://cdn.serc.carleton.edu/files/NAGTWorkshops/geodesy/activities/california-teacher-guide.v2.pdf
++ * The coordinates and rates are approximate as published, NOT modern final-network precision.
++ * The 2022 date is the teaching GUIDE DATE, not the GNSS processing reference epoch.
++ */
++export const earthscopeTeachingMetadata = {
++  label: "EarthScope / UNAVCO teaching example",
++  frame: "NAM14",
++  published: "2022-05-14",
++  sampleType: "rounded teaching-guide trends",
++  sourceUrl: "https://cdn.serc.carleton.edu/files/NAGTWorkshops/geodesy/activities/california-teacher-guide.v2.pdf",
++  licenseNote: "Cite original EarthScope/UNAVCO teaching material; approximate values only.",
++} as const;
++
++export const earthscopeTeachingRows: GnssRecord[] = [
++  { site: "SBCC", lat: 33.553, lon: -117.661, ve: -26.1, vn: 27.3, referenceFrame: "NAM14", epoch: "not reported; 2022-05-14 guide date", sourceUrl: earthscopeTeachingMetadata.sourceUrl, estimated: true },
++  { site: "BEMT", lat: 34.001, lon: -115.998, ve: -4.0, vn: 4.6, referenceFrame: "NAM14", epoch: "not reported; 2022-05-14 guide date", sourceUrl: earthscopeTeachingMetadata.sourceUrl, estimated: true },
++];
+diff --git a/src/data/sources.ts b/src/data/sources.ts
+index 95c4dac..aa79278 100644
+--- a/src/data/sources.ts
++++ b/src/data/sources.ts
+@@ -7,6 +7,7 @@ export const sources: Source[] = [
+   { id: "herring2016", kind: "journal", apa: "Herring, T. A., Melbourne, T. I., Murray, M. H., Floyd, M. A., Szeliga, W. M., King, R. W., Phillips, D. A., Puskas, C. M., Santillan, M., & Wang, L. (2016). Plate Boundary Observatory and related networks: GPS data analysis methods and geodetic products. Reviews of Geophysics, 54, 759–808.", url: "https://doi.org/10.1002/2016RG000529", note: "Recheck DOI, punctuation, and title-case requirements for final APA 7 submission." },
+   { id: "usgs-comcat", kind: "dataset", apa: "U.S. Geological Survey. (2017). Advanced National Seismic System (ANSS) Comprehensive Catalog [Data set].", url: "https://doi.org/10.5066/F7MS3QZH", note: "Display date range, query and retrieval time for every map." },
+   { id: "usgs-faults", kind: "dataset", apa: "U.S. Geological Survey. (2020). Quaternary Fault and Fold Database for the Nation [Data set].", url: "https://doi.org/10.5066/P9BCVRCK", note: "A source-access link, not an imported GIS trace." },
++  { id: "earthscope-teaching", kind: "dataset", apa: "Fox-Lent, C., Newman, A., Olds, S., West, N., & Thesenga, D. (2022, May 14). Exploring plate motion and deformation in California with GPS: Teacher guide. UNAVCO / EarthScope.", url: "https://cdn.serc.carleton.edu/files/NAGTWorkshops/geodesy/activities/california-teacher-guide.v2.pdf", note: "Page 5–6. SBCC and BEMT rates are explicitly approximate classroom answers; processing epoch and 1-sigma uncertainties not provided." },
+   { id: "earthscope", kind: "dataset", apa: "National Geophysical Facility. (n.d.). GNSS derived data products [Data set].", url: "https://www.unavco.org/data/gps-gnss/derived-products/derived-products.html", note: "Verify downloaded solution version, reference frame and station epochs." },
+   { id: "msen1998", kind: "standard", apa: "Department of Standards Malaysia. (2015). MS EN 1998-1:2015: Eurocode 8—Design of structures for earthquake resistance, Part 1.", url: "https://mysol.jsm.gov.my/", note: "Standard title verified; compliance claims require student verification." }
+ ];

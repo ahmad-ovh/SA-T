@@ -1,0 +1,3 @@
+site,lat,lon,ve_mm_yr,vn_mm_yr,reference_frame,epoch
+SBCC,33.553,-117.661,-26.1,27.3,NAM14,not reported; 2022-05-14 guide date
+BEMT,34.001,-115.998,-4.0,4.6,NAM14,not reported; 2022-05-14 guide date

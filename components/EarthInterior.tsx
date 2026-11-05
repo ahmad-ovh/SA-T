@@ -1,0 +1,19 @@
+"use client";
+import { useState } from "react";
+import { SectionHeading, ResearchSlot, ScientificFigure, SourceLabel } from "./Shared";
+import { story } from "@/src/content/story";
+
+type Mode = "composition" | "mechanics";
+export function EarthInterior() {
+  const [stage, setStage] = useState(0);
+  const [mode, setMode] = useState<Mode>("composition");
+  const [selected, setSelected] = useState(0);
+  const layers = story.interior[mode];
+  const circleSizes = [174, 146, 102, 55];
+  function changeMode(next: Mode) { setMode(next); setSelected(0); }
+  return <section id="origin" className="chapter chapter-paper" data-chapter><SectionHeading number="01" label="PLANETARY FORMATION" title="Origin & Interior" summary="Before plates can move, a planet must take shape—and develop layers with different physical behaviours." />
+    <div className="formation"><div className="panel-heading"><span>01 / THE FORMATION SEQUENCE</span><span>STUDENT RESEARCH REQUIRED</span></div><div className="stage-controls" role="group" aria-label="Earth formation stages">{story.formation.map((item, i) => <button type="button" className={stage===i?"stage active":"stage"} key={item.title} aria-pressed={stage===i} onClick={()=>setStage(i)}><span>0{i+1}</span><b>{item.title}</b></button>)}</div><div className="stage-note" key={stage}><b>{story.formation[stage].subtitle}</b><ResearchSlot>{story.formation[stage].text}</ResearchSlot></div></div>
+    <div className="two-up interior-grid"><ScientificFigure figure="01-A" description="Original schematic. Relative radial distances are illustrative; no physical scale is implied."><div className="diagram-panel"><div className="panel-heading"><span>02 / CROSS-SECTION EXPLORER</span><span>SELECT A LAYER</span></div><svg className="earth-diagram" viewBox="0 0 500 420" role="group" aria-label="Select Earth layers for description"><defs><pattern id="earth-hatch" width="5" height="5" patternUnits="userSpaceOnUse"><path d="M0 5 5 0" stroke="#d4c1a0" strokeOpacity=".12" /></pattern></defs>{layers.map((layer,i)=><circle key={layer.id} cx="240" cy="210" r={circleSizes[i]} fill={layer.color} stroke={selected===i?"#f4e7ce":"#50483d"} strokeWidth={selected===i?4:1.2} className="earth-layer" role="button" tabIndex={0} aria-label={`Select ${layer.title}`} onClick={()=>setSelected(i)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setSelected(i)}}} />)}<circle cx="240" cy="210" r="174" fill="url(#earth-hatch)" pointerEvents="none"/><path d="M240 35V384M65 210H415" stroke="#e6dcc8" strokeOpacity=".17" strokeDasharray="4 6" pointerEvents="none"/><text x="25" y="36" className="svg-caption">INTERNAL STRUCTURE / NOT TO SCALE</text><text x="362" y="391" className="svg-caption">FIG. 01-A</text></svg></div></ScientificFigure>
+    <div className="reading-panel"><div className="panel-heading"><span>VIEW BY</span><span>CLASSIFICATION 01-A</span></div><div className="segmented"><button aria-pressed={mode==="composition"} className={mode==="composition"?"selected":""} onClick={()=>changeMode("composition")}>Composition</button><button aria-pressed={mode==="mechanics"} className={mode==="mechanics"?"selected":""} onClick={()=>changeMode("mechanics")}>Mechanical</button></div><div className="layer-list" role="group" aria-label="Choose interior layer">{layers.map((layer,i)=><button type="button" key={layer.id} className={i===selected?"layer-row selected":"layer-row"} onClick={()=>setSelected(i)} aria-pressed={selected===i}><span className="layer-swatch" style={{background:layer.color}}/><span>{layer.title}</span><span>0{i+1}</span></button>)}</div><div className="selected-layer"><p className="eyebrow">SELECTED MATERIAL / {mode.toUpperCase()}</p><h3>{layers[selected].title}</h3><ResearchSlot>{layers[selected].note}</ResearchSlot></div></div></div>
+  </section>;
+}

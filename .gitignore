@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+.vercel/
+.env*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+# Local visual QA export; not part of the deployable artefact
+motion-frames.html

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PROJECT SAN ANDREAS // TOP SECRET GEODYNAMIC DOSSIER</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Tactical HUD & Filter Overlays -->
+  <div class="scanlines"></div>
+  <div class="hud-grid-overlay"></div>
+
+  <!-- Classified Security Banner -->
+  <header class="classification-bar">
+    <div class="badge-live">
+      <span class="pulse-dot"></span>
+      <span>GEODYNAMICS COMMAND :: ACTIVE MONITORING</span>
+    </div>
+    <div>TOP SECRET // NOFORN // CLASSIFIED TECTONICS // UTM SKTP 2613</div>
+    <div id="live-utc-clock">2026-11-02 UTC</div>
+  </header>
+
+  <!-- Main Dossier Container -->
+  <main class="dossier-wrapper">
+
+    <!-- Mission Header Deck -->
+    <header class="dossier-header">
+      <div class="header-top-row">
+        <div class="header-title-block">
+          <h1>PROJECT SAN ANDREAS</h1>
+          <div class="subtitle">CONTINENTAL TRANSFORM DYNAMICS & MALAYSIA SEISMIC NEXUS</div>
+        </div>
+        <div class="telemetry-meta">
+          <span>REGION: <b>SAN ANDREAS FAULT SYSTEM (SAFS)</b></span>
+          <span>REGIME: <b>PACIFIC – NORTH AMERICAN SHEAR MARGIN</b></span>
+          <span>TAXONOMY: <b>BLOOM C3 (APPLY) // PLO1 KW // CLO1</b></span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <button id="audio-toggle-btn" class="hud-btn">AUDIO: [ACTIVE]</button>
+        <button id="scanline-toggle-btn" class="hud-btn active">CRT FILTER: [ON]</button>
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); margin-left: auto;">
+          CLEARANCE: <b style="color: var(--accent-cyan);">LEVEL-5 ORCON</b>
+        </span>
+      </div>
+
+      <nav class="dossier-nav">
+        <a href="#dossier-01" class="nav-tab"><span class="tab-idx">01</span> ORIGIN & INTERIOR</a>
+        <a href="#dossier-02" class="nav-tab"><span class="tab-idx">02</span> TECTONIC DRIVERS</a>
+        <a href="#dossier-03" class="nav-tab"><span class="tab-idx">03</span> EMPIRICAL EVIDENCE</a>
+        <a href="#dossier-04" class="nav-tab"><span class="tab-idx">04</span> THEN & NOW</a>
+        <a href="#dossier-05" class="nav-tab"><span class="tab-idx">05</span> MALAYSIA NEXUS</a>
+        <a href="#dossier-06" class="nav-tab"><span class="tab-idx">06</span> REFERENCES</a>
+      </nav>
+    </header>
+
+    <!-- ====================================================================
+         SECTION 1: ORIGIN AND INTERIOR CONTEXT
+         ==================================================================== -->
+    <section id="dossier-01" class="dossier-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-badge">DOSSIER 01</span>
+          <h2>ORIGIN AND INTERIOR CONTEXT: THERMODYNAMIC RHEOLOGY</h2>
+        </div>
+        <span class="section-stamp">GEOMECHANICAL AUDIT</span>
+      </div>
+
+      <div class="section-body">
+        <div class="dossier-grid">
+          <article class="intel-card">
+            <h3>PLANETARY DIFFERENTIATION & THE HEAT ENGINE</h3>
+            <p>
+              Earth formed ~4.56 Ga via solar nebula condensation and planetesimal accretion. Gravitational potential energy release (~2.5×10³⁰ J) and radiogenic decay (²⁶Al, ²³⁸U, ²³⁵U, ²³²Th, ⁴⁰K) caused extensive melting. Dense Fe-Ni sank to form the core, while buoyant silicates formed the mantle and primitive crust (Turcotte & Schubert, 2014).
+            </p>
+            <p>
+              This established a thermodynamic heat engine: core-mantle heat flux drives mantle convection, converting thermal energy into mechanical plate motion.
+            </p>
+          </article>
+
+          <article class="intel-card">
+            <h3>RHEOLOGICAL REGIMES: LITHOSPHERE VS. ASTHENOSPHERE</h3>
+            <p>
+              Mechanical stratification is dictated by homologous temperature (T/T_melt) and strain rate:
+            </p>
+            <ul>
+              <li>
+                <b>Brittle Lithosphere (0–100 km):</b> Cold thermal boundary (T &lt; 1300°C). Behaves elastically, failing by Byerlee's law frictional sliding (τ = μ·σ_n) and stick-slip ruptures in the upper 0–15 km crust.
+              </li>
+              <li>
+                <b>Ductile Asthenosphere (100–410 km):</b> Near-solidus peridotite (T/T_melt ≈ 0.85–0.95, viscosity η ≈ 10¹⁹–10²¹ Pa·s). Deforms plastically via dislocation creep, mechanically decoupling plates.
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Cross-Section Simulator -->
+        <div class="sim-container">
+          <div class="sim-header">
+            <h3>TECTONIC CROSS-SECTION PHYSICS SIMULATOR</h3>
+            <span class="metric-pill">LIVE STICK-SLIP SEISMOMECHANICS</span>
+          </div>
+
+          <div class="canvas-wrapper">
+            <canvas id="tectonic-physics-canvas"></canvas>
+          </div>
+
+          <div class="telemetry-readout-grid">
+            <div class="readout-box">
+              <div class="readout-label">ELAPSED TIME</div>
+              <div id="sim-readout-years" class="readout-val">142 yr</div>
+            </div>
+            <div id="gauge-strain-box" class="readout-box">
+              <div class="readout-label">SHEAR STRAIN</div>
+              <div id="sim-readout-strain" class="readout-val">454.4 µε</div>
+            </div>
+            <div class="readout-box">
+              <div class="readout-label">ELASTIC ENERGY</div>
+              <div id="sim-readout-energy" class="readout-val">2.84 ×10¹⁷ J</div>
+            </div>
+            <div class="readout-box warning">
+              <div class="readout-label">POTENTIAL MAGNITUDE</div>
+              <div id="sim-readout-mag" class="readout-val">M7.85</div>
+            </div>
+            <div class="readout-box">
+              <div class="readout-label">BASAL TRACTION</div>
+              <div id="sim-readout-traction" class="readout-val">1.8 MPa</div>
+            </div>
+          </div>
+
+          <div class="sim-controls-panel">
+            <div class="control-group">
+              <label>PLATE VELOCITY: <span id="sim-rate-val" class="val">48 mm/yr</span></label>
+              <input type="range" id="sim-plate-rate" min="10" max="80" value="48" step="1">
+            </div>
+            <div class="control-group">
+              <label>LOCKING DEPTH (BDTZ): <span id="sim-depth-val" class="val">15 km</span></label>
+              <input type="range" id="sim-lock-depth" min="5" max="25" value="15" step="1">
+            </div>
+            <div class="control-group">
+              <label>ASTHENOSPHERE VISCOSITY: <span id="sim-visc-val" class="val">10^20 Pa·s</span></label>
+              <input type="range" id="sim-viscosity" min="19" max="21" value="20" step="0.1">
+            </div>
+            <div class="control-group" style="justify-content: flex-end;">
+              <button id="sim-trigger-rupture" class="hud-btn btn-danger" style="width: 100%; justify-content: center;">
+                TRIGGER STICK-SLIP SEISMIC RUPTURE
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 2: TECTONIC SETTING & DRIVING MECHANISMS
+         ==================================================================== -->
+    <section id="dossier-02" class="dossier-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-badge">DOSSIER 02</span>
+          <h2>TECTONIC SETTING: FORCE BALANCES & DRIVING MECHANISMS</h2>
+        </div>
+        <span class="section-stamp">VECTOR MECHANICS REPORT</span>
+      </div>
+
+      <div class="section-body">
+        <div class="dossier-grid">
+          <article class="intel-card">
+            <h3>REGIONAL KINEMATIC SETTING</h3>
+            <p>
+              The San Andreas Fault System (SAFS) is a ~1,200 km continental right-lateral (dextral) strike-slip transform boundary accommodating ~48–50 mm/yr of relative motion between the <b>Pacific Plate</b> and <b>North American Plate</b>.
+            </p>
+            <p>
+              It connects the Mendocino Triple Junction (Pacific–North America–Gorda) in the north to the extensional Salton Trough and Gulf of California spreading rift in the south (Atwater, 1970).
+            </p>
+          </article>
+
+          <article class="intel-card">
+            <h3>RIGOROUS FORCE BALANCE JUSTIFICATION</h3>
+            <p>
+              Transform boundaries possess neither local subducting slabs nor spreading ridges. Kinematics are governed by the Pacific Plate's integrated torque balance:
+            </p>
+            <ul>
+              <li>
+                <b>Dominant Driver (Slab Pull):</b> Accounts for ~90% of global driving torque (Forsyth & Uyeda, 1975). Cold, dense oceanic lithosphere sinking into Western Pacific trenches (Mariana, Kuril, Aleutian) pulls the Pacific Plate northwestward.
+              </li>
+              <li>
+                <b>Ridge Push (F_RP):</b> Secondarily contributes ~2–3×10¹² N/m from elevated East Pacific Rise spreading centers.
+              </li>
+              <li>
+                <b>Resisting Force:</b> The SAF operates as a frictional shear zone resisting motion (τ ≈ 10–30 MPa) until co-seismic slip.
+              </li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 3: THE EVIDENCE LAYER
+         ==================================================================== -->
+    <section id="dossier-03" class="dossier-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-badge">DOSSIER 03</span>
+          <h2>THE EVIDENCE LAYER: EMPIRICAL MULTI-DATA INTEGRATION</h2>
+        </div>
+        <span class="section-stamp">EMPIRICAL DATA ARCHIVE</span>
+      </div>
+
+      <div class="section-body">
+        <!-- Evidence Tabs -->
+        <div class="evidence-terminal-tabs">
+          <button class="evidence-tab-btn active" data-tab="ev-panel-gps">1. GPS GEODETIC VELOCITY</button>
+          <button class="evidence-tab-btn" data-tab="ev-panel-depth">2. HYPOCENTRE DEPTH (BDTZ)</button>
+          <button class="evidence-tab-btn" data-tab="ev-panel-mag">3. MAGNETIC STRIPING (ISOCHRONS)</button>
+          <button class="evidence-tab-btn" data-tab="ev-panel-caliper">4. GEOMORPHIC OFFSET (WALLACE CREEK)</button>
+        </div>
+
+        <!-- 1. GPS -->
+        <div id="ev-panel-gps" class="evidence-panel active">
+          <div class="dossier-grid">
+            <div class="intel-card">
+              <h3>SAVAGE & BURFORD (1973) DISLOCATION MODEL</h3>
+              <p>
+                Continuous PBO GPS velocities fit an elastic screw dislocation:
+              </p>
+              <p style="font-family: var(--font-mono); color: var(--accent-cyan); background: var(--bg-card); padding: 6px; border-left: 3px solid var(--accent-cyan);">
+                v(x) = (V₀ / π) · arctan(x / D)
+              </p>
+              <p>
+                where V₀ ≈ 36 mm/yr (fault slip rate) and D ≈ 14 km (locking depth). Interseismic strain accumulates elastically across a 60-km aperture.
+              </p>
+              <div class="control-group" style="margin-top: 8px;">
+                <label>LOCKING DEPTH D: <span id="gps-depth-val" class="val">14 km</span></label>
+                <input type="range" id="gps-lock-depth-slider" min="5" max="25" value="14" step="1">
+              </div>
+              <div class="control-group" style="margin-top: 8px;">
+                <label>SLIP RATE V₀: <span id="gps-rate-val" class="val">36 mm/yr</span></label>
+                <input type="range" id="gps-rate-slider" min="20" max="50" value="36" step="1">
+              </div>
+              <div style="margin-top: 8px; font-family: var(--font-mono); font-size: 0.8rem;">
+                RESIDUAL RMSE: <span id="gps-rmse-val" style="color: var(--accent-green); font-weight: bold;">0.84 mm/yr</span>
+              </div>
+            </div>
+            <div>
+              <div class="canvas-wrapper"><canvas id="gps-dislocation-canvas"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Hypocentre Depth -->
+        <div id="ev-panel-depth" class="evidence-panel">
+          <div class="dossier-grid">
+            <div class="intel-card">
+              <h3>MICROSEISMIC DEPTH CUTOFF</h3>
+              <p>
+                Relocated earthquake hypocentres from USGS NCEDC catalogs show seismicity abruptly terminates at ~15 km depth.
+              </p>
+              <p>
+                This boundary marks the 350°C Brittle-Ductile Transition Zone. Below 15 km, quartz deforms by ductile dislocation creep without generating stick-slip earthquakes.
+              </p>
+            </div>
+            <div>
+              <div class="canvas-wrapper"><canvas id="hypocentre-canvas"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Magnetic Striping -->
+        <div id="ev-panel-mag" class="evidence-panel">
+          <div class="dossier-grid">
+            <div class="intel-card">
+              <h3>SEAFLOOR MAGNETIC ANOMALY ISOCHRONS</h3>
+              <p>
+                Oceanic basalt magnetic striping (Chrons 1–21) recorded Pacific-Farallon seafloor spreading (Atwater, 1970).
+              </p>
+              <p>
+                Truncation of anomaly stripes against North America dates ridge subduction at ~30 Ma, initiating the San Andreas transform fault and migrating Mendocino/Rivera triple junctions.
+              </p>
+            </div>
+            <div>
+              <div class="canvas-wrapper"><canvas id="magnetic-stripe-canvas"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Wallace Creek Caliper -->
+        <div id="ev-panel-caliper" class="evidence-panel">
+          <div class="dossier-grid">
+            <div class="intel-card">
+              <h3>GEOMORPHIC OFFSET: WALLACE CREEK</h3>
+              <p>
+                At Wallace Creek (Carrizo Plain), the incised active stream channel is offset 130 m right-laterally.
+              </p>
+              <p>
+                Radiocarbon dating (¹⁴C) of alluvial charcoal dates channel formation to 3,700 ± 150 yr BP (Sieh & Jahns, 1984):
+              </p>
+              <p style="font-family: var(--font-mono); color: var(--accent-green); background: var(--bg-card); padding: 6px; border-left: 3px solid var(--accent-green);">
+                Slip Rate = 130 m / 3,700 yr = 35.1 ± 3 mm/yr
+              </p>
+              <p style="font-size: 0.8rem; color: var(--accent-cyan); margin-top: 6px;">
+                Drag inside canvas to measure channel offset with the interactive caliper.
+              </p>
+            </div>
+            <div>
+              <div class="canvas-wrapper"><canvas id="wallace-creek-canvas"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 4: THEN AND NOW (PALEOGEOGRAPHIC RECONSTRUCTION)
+         ==================================================================== -->
+    <section id="dossier-04" class="dossier-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-badge">DOSSIER 04</span>
+          <h2>THEN AND NOW: 200 MILLION YEAR PALEOGEOGRAPHIC EVOLUTION</h2>
+        </div>
+        <span class="section-stamp">PALEOMAP PLAYBACK</span>
+      </div>
+
+      <div class="section-body">
+        <div class="player-interface">
+          <div class="player-screen">
+            <div class="player-hud-overlay">
+              <div class="rec-indicator">
+                <span class="pulse-dot" style="background: var(--accent-red);"></span>
+                <span>PALEOMAP RECONSTRUCTION</span>
+              </div>
+              <div id="epoch-title" style="font-weight: 700; color: var(--accent-amber);">
+                PRESENT DAY (0 Ma) - MODERN SAFS
+              </div>
+            </div>
+            <canvas id="paleo-player-canvas"></canvas>
+          </div>
+
+          <div class="player-controls-bar">
+            <div class="scrubber-track">
+              <span class="time-readout-badge" id="time-badge">0 Ma</span>
+              <input type="range" id="time-scrubber" min="0" max="4" value="3" step="1">
+            </div>
+
+            <div class="vcr-buttons">
+              <div class="vcr-btn-group">
+                <button id="vcr-rew-btn" class="vcr-btn">◄◄ STEP</button>
+                <button id="vcr-play-btn" class="vcr-btn">▶ PLAY</button>
+                <button id="vcr-ffw-btn" class="vcr-btn">STEP ►►</button>
+              </div>
+
+              <div class="epoch-pills">
+                <button class="epoch-pill" data-idx="0">200 Ma</button>
+                <button class="epoch-pill" data-idx="1">100 Ma</button>
+                <button class="epoch-pill" data-idx="2">30 Ma</button>
+                <button class="epoch-pill active" data-idx="3">0 Ma (SAF)</button>
+                <button class="epoch-pill" data-idx="4">+30 Ma</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="dossier-grid" style="margin-top: 15px;">
+            <div class="intel-card">
+              <h3>TECTONIC REGIME RECONSTRUCTION</h3>
+              <p id="epoch-desc">
+                Mature 1,200 km dextral continental transform fault. Accommodates 48 mm/yr of relative motion between Pacific and North American plates from Cape Mendocino to Salton Trough.
+              </p>
+            </div>
+            <div class="intel-card">
+              <h3>BOUNDARY & DRIVER KINEMATICS</h3>
+              <ul>
+                <li><b>PLATE 1:</b> <span id="epoch-plate-a" style="color: var(--accent-cyan);">Pacific Plate</span></li>
+                <li><b>PLATE 2:</b> <span id="epoch-plate-b" style="color: var(--accent-cyan);">North American Plate</span></li>
+                <li><b>REGIME:</b> <span id="epoch-boundary" style="color: var(--accent-amber);">Continental Dextral Transform</span></li>
+                <li><b>DRIVER:</b> <span id="epoch-driver" style="color: var(--accent-green);">Western Pacific Slab Pull</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 5: WHY IT MATTERS & MALAYSIA NEXUS
+         ==================================================================== -->
+    <section id="dossier-05" class="dossier-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-badge">DOSSIER 05</span>
+          <h2>WHY IT MATTERS: HAZARDS, BASINS & MALAYSIA NEXUS</h2>
+        </div>
+        <span class="section-stamp">GEOTECHNICAL NEXUS</span>
+      </div>
+
+      <div class="section-body">
+        <div class="dossier-grid">
+          <article class="intel-card">
+            <h3>SAN ANDREAS HAZARDS & BASIN RESOURCES</h3>
+            <p>
+              <b>Seismic Hazard:</b> The locked Southern SAF has not ruptured since 1690 (&gt;330 yr deficit, ~5 m slip deficit), posing an Mw 7.8+ threat. Lifelines require flexible slip joints.
+            </p>
+            <p>
+              <b>Resources:</b> Pull-apart basins (LA, Ventura) trap hydrocarbon reservoirs. Salton Sea geothermal fields yield clean energy and commercial lithium.
+            </p>
+          </article>
+
+          <article class="intel-card">
+            <h3>EXPLICIT GEODYNAMIC NEXUS: MALAYSIA</h3>
+            <p>
+              Malaysia sits on the intraplate Sunda Plate, exhibiting critical geodynamic vulnerability:
+            </p>
+            <ul>
+              <li>
+                <b>Sumatran Strike-Slip Analogue:</b> The 1,900 km dextral <b>Great Sumatran Fault</b> shares identical kinematics with the SAF, radiating long-period waves into Peninsular Malaysia.
+              </li>
+              <li>
+                <b>Reactivated Intraplate Faults:</b> Ancient shear sutures (e.g., <b>Bukit Tinggi Fault Zone</b>) slip under compressive stress (Mw 1.5–3.5 swarms; Shuib, 2009).
+              </li>
+              <li>
+                <b>Sabah Active Faulting:</b> The 2015 <b>Ranau Mw 6.0 earthquake</b> on the Mensaban fault killed 18 on Mount Kinabalu (Tongkul, 2016).
+              </li>
+              <li>
+                <b>Structural Codes:</b> Malaysia Annex to Eurocode 8 (MS EN 1998-1:2015) mandates design against resonant shaking on soft clays.
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Malaysia Soil Resonance Simulator -->
+        <div class="sim-container">
+          <div class="sim-header">
+            <h3>MALAYSIA STRUCTURAL RESONANCE SIMULATOR (EUROCODE 8)</h3>
+            <span class="metric-pill warning">RESONANCE AUDIT</span>
+          </div>
+
+          <div class="dossier-grid">
+            <div>
+              <div class="sim-controls-panel" style="border: none; padding: 0; margin: 0;">
+                <div class="control-group">
+                  <label>FOUNDATION GEOLOGY:</label>
+                  <select id="my-soil-type" class="hud-btn" style="background: var(--bg-card); color: var(--text-bright);">
+                    <option value="clay" selected>KL Soft Alluvial Clay (Class D/E)</option>
+                    <option value="rock">Granite Bedrock (Class A)</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label>BUILDING STRUCTURAL PROFILE:</label>
+                  <select id="my-bldg-height" class="hud-btn" style="background: var(--bg-card); color: var(--text-bright);">
+                    <option value="high" selected>40-Storey KL Condo (T ≈ 2.2s)</option>
+                    <option value="low">2-Storey Landed (T ≈ 0.2s)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="intel-callout red" style="margin-top: 15px;">
+                SPECTRAL SITE AMPLIFICATION: <b id="my-amp-readout" style="color: var(--accent-red); font-size: 1.1rem;">7.0x</b>. Deep alluvial clays amplify distant Sumatran shear waves matching tall high-rise resonance!
+              </div>
+            </div>
+
+            <div>
+              <div class="canvas-wrapper"><canvas id="my-resonance-canvas"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Knowledge Verification Quiz -->
+        <div class="quiz-box">
+          <h3 style="font-family: var(--font-mono); color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 10px;">
+            CLASSIFIED GEODYNAMIC VERIFICATION ASSESSMENT
+          </h3>
+
+          <div class="quiz-question">
+            <h4>1. Why does the asthenosphere flow plastically while the lithosphere fractures elastically?</h4>
+            <div class="quiz-options">
+              <button class="quiz-opt-btn" data-quiz-q="1" data-opt-idx="0">A) Asthenosphere is 100% liquid magma.</button>
+              <button class="quiz-opt-btn" data-quiz-q="1" data-opt-idx="1">B) Homologous temperature (T/Tm ≈ 0.9) drives olivine dislocation creep.</button>
+              <button class="quiz-opt-btn" data-quiz-q="1" data-opt-idx="2">C) Lithosphere is less dense than the mantle.</button>
+            </div>
+            <div id="quiz-feedback-1" class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question">
+            <h4>2. What dominates the driving force budget for the San Andreas Fault plate system?</h4>
+            <div class="quiz-options">
+              <button class="quiz-opt-btn" data-quiz-q="2" data-opt-idx="0">A) Far-field Western Pacific slab pull pulling the Pacific Plate.</button>
+              <button class="quiz-opt-btn" data-quiz-q="2" data-opt-idx="1">B) Direct ridge push inside the fault zone.</button>
+              <button class="quiz-opt-btn" data-quiz-q="2" data-opt-idx="2">C) Tidal pull from lunar gravitational forces.</button>
+            </div>
+            <div id="quiz-feedback-2" class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question">
+            <h4>3. What does Savage &amp; Burford's (1973) GPS dislocation model demonstrate?</h4>
+            <div class="quiz-options">
+              <button class="quiz-opt-btn" data-quiz-q="3" data-opt-idx="0">A) Plates slide freely with zero stress accumulation.</button>
+              <button class="quiz-opt-btn" data-quiz-q="3" data-opt-idx="1">B) Earthquakes nucleate down to 200 km depth in the asthenosphere.</button>
+              <button class="quiz-opt-btn" data-quiz-q="3" data-opt-idx="2">C) Locked upper ~14 km brittle crust accumulates elastic strain.</button>
+            </div>
+            <div id="quiz-feedback-3" class="quiz-feedback"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         SECTION 6: CLASSIFIED INTELLIGENCE SOURCES (REFERENCES)
+         ==================================================================== -->
+    <section id="dossier-06" class="dossier-section">
+      <div class="section-header">
+        <div class="section-title">
+          <span class="section-badge">DOSSIER 06</span>
+          <h2>CLASSIFIED INTELLIGENCE SOURCES (ACADEMIC REFERENCES)</h2>
+        </div>
+        <span class="section-stamp">PEER-REVIEWED ARCHIVE</span>
+      </div>
+
+      <div class="section-body">
+        <ul class="ref-list">
+          <li class="ref-item">
+            <span class="ref-id">[01]</span>
+            <b>Atwater, T. (1970).</b> Cenozoic tectonic evolution of western North America. <i>GSA Bulletin</i>, 81(12), 3513–3536.
+          </li>
+          <li class="ref-item">
+            <span class="ref-id">[02]</span>
+            <b>Savage, J. C., &amp; Burford, R. O. (1973).</b> Geodetic determination of relative plate motion. <i>J. Geophys. Res.</i>, 78(5), 832–845.
+          </li>
+          <li class="ref-item">
+            <span class="ref-id">[03]</span>
+            <b>Sieh, K. E., &amp; Jahns, R. H. (1984).</b> Holocene activity of the San Andreas fault. <i>GSA Bulletin</i>, 95(8), 883–896.
+          </li>
+          <li class="ref-item">
+            <span class="ref-id">[04]</span>
+            <b>Turcotte, D. L., &amp; Schubert, G. (2014).</b> <i>Geodynamics</i> (3rd ed.). Cambridge University Press.
+          </li>
+          <li class="ref-item">
+            <span class="ref-id">[05]</span>
+            <b>Shuib, I. (2009).</b> Active Bukit Tinggi fault zone in Peninsular Malaysia. <i>Bull. Geol. Soc. Malaysia</i>, 55, 69–77.
+          </li>
+          <li class="ref-item">
+            <span class="ref-id">[06]</span>
+            <b>Tongkul, F. (2016).</b> The 2015 Ranau earthquake on Mount Kinabalu, Sabah. <i>Bull. Geol. Soc. Malaysia</i>, 62, 1–6.
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="dossier-footer">
+      <div>SKTP 2613 / SETP 2213 BASIC GEOSCIENCE · FACULTY OF CHEMICAL AND ENERGY ENGINEERING, UTM</div>
+      <div style="margin-top: 5px; color: var(--accent-cyan);">
+        DEPLOYMENT READY FOR GITHUB PAGES · REPOSITORY: <span style="color: var(--text-bright);">index.html | styles.css | app.js</span>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

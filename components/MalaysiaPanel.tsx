@@ -1,0 +1,23 @@
+"use client";
+import { useState } from "react";
+import { useAnimatedNumber } from "./useMotion";
+import { SectionHeading, SourceLabel, ResearchSlot, ScientificFigure } from "./Shared";
+import { story } from "@/src/content/story";
+
+type Material="rock"|"soil";
+type Design="rigid"|"ductile";
+function Building({ ground, design }: { ground:Material;design:Design }) {
+  const sway=useAnimatedNumber(ground==="soil"?11:4);
+  return <svg viewBox="0 0 390 285" role="img" aria-label={`${ground} site and ${design} structure, illustrative no certified performance or intensity`}><rect width="390" height="285" fill="#d8d2bf"/><path d="M0 230H390V285H0Z" fill={ground==="soil"?"#b69c75":"#7b7f78"} className="engineering-ground"/>
+    <path className="engineering-ground" d="M0 245Q50 238 90 247T180 245T275 247T390 245M0 261Q65 253 135 260T285 260T390 259" fill="none" stroke="#e3cbaa" strokeWidth="3" opacity={ground==="soil"?1:0}/>
+    <path className="engineering-ground" d="M0 250l55-9 45 11 70-10 60 11 50-13 110 12" fill="none" stroke="#aaa99c" strokeWidth="4" opacity={ground==="rock"?1:0}/>
+    <g stroke={design==="ductile"?"#526d61":"#805447"} strokeWidth="4" fill="#c4b69c"><path d={`M140 229L${140+sway} 47h105l${-sway} 182Z`}/>{[91,135,179].map(y=><path key={y} d={`M${140+(sway*(229-y)/182)} ${y}H${245-(sway*(229-y)/182)}`} fill="none" strokeWidth="2"/>)}{[160,204,228].map(x=><path key={x} d={`M${x+sway/2} 48L${x} 229`} fill="none" strokeWidth="2"/>)}</g><path d={`M254 91q${sway*1.2} -20 0-39`} stroke="#8e3c32" fill="none" strokeWidth="2.5"/><text x="20" y="28" className="geo-label">{ground==="soil"?"SOFT SOIL CONCEPT":"ROCK CONCEPT"}</text><text x="20" y="271" className="svg-white">NOT A DESIGN CALCULATION</text><text x="263" y="53" className="geo-label">SWAY</text></svg>;
+}
+export function MalaysiaPanel() {
+  const [ground,setGround]=useState<Material>("soil");const [design,setDesign]=useState<Design>("rigid");const [compare,setCompare]=useState(true);
+  return <section id="malaysia" className="chapter chapter-paper" data-chapter><SectionHeading number="05" label="LOCAL IMPLICATIONS" title="Why It Matters" summary="California and Malaysia do not share the same tectonic setting. The transferable lesson is how to investigate ground movement and design responsibly."/>
+    <div className="malaysia-intro"><div><p className="eyebrow">CASE STUDY / MALAYSIA</p><h3>Different geology.<br/><em>Shared questions.</em></h3><p>Site conditions, fault exposure and structural form require context-specific assessment. These diagrams show concepts, not predicted amplification or code compliance.</p><SourceLabel id="msen1998">MALAYSIAN SEISMIC STANDARD</SourceLabel></div><div className="malaysia-stamp"><span>CALIFORNIA</span><b>≠</b><span>MALAYSIA</span><small>DIFFERENT HAZARD CONTEXTS</small></div></div>
+    <div className="engineering-panel"><div className="panel-heading"><span>ENGINEERING COMPARISON / 05-A</span><span>CONCEPT ONLY</span></div><div className="engineering-controls"><div className="control-unit"><label htmlFor="foundation">GROUND TYPE</label><select id="foundation" value={ground} onChange={e=>setGround(e.target.value as Material)}><option value="soil">Soft soil · illustrative</option><option value="rock">Competent rock · illustrative</option></select></div><div className="control-unit"><label htmlFor="design">STRUCTURAL DETAIL</label><select id="design" value={design} onChange={e=>setDesign(e.target.value as Design)}><option value="rigid">Conventional schematic</option><option value="ductile">Ductile detailing concept</option></select></div><label className="check-row"><input type="checkbox" checked={compare} onChange={e=>setCompare(e.target.checked)}/> Show comparison</label></div><ScientificFigure figure="05" description="Original teaching diagram. Sway is exaggerated, unrelated to actual seismic intensity or design resistance."><div className={`engineering-visual ${compare?"dual":""}`}><div><span className="figure-label">SELECTED SCENARIO</span><Building ground={ground} design={design}/></div>{compare&&<div><span className="figure-label">CONTRASTING SCENARIO</span><Building ground={ground==="soil"?"rock":"soil"} design={design==="rigid"?"ductile":"rigid"}/></div>}</div></ScientificFigure></div>
+    <div className="two-up closing-notes"><div className="reading-panel"><p className="eyebrow">STUDENT ENGINEERING ANALYSIS</p><ResearchSlot>{story.malaysia.comparison}</ResearchSlot></div><div className="reading-panel conclusion"><p className="eyebrow">FINAL ASSESSMENT / STUDENT CONCLUSION</p><ResearchSlot>{story.malaysia.conclusion}</ResearchSlot></div></div>
+  </section>;
+}
