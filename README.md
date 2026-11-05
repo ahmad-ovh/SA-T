@@ -164,4 +164,13 @@ npm install
 npm run check:motion
 npm run build
 ```
-"# SA-T" 
+
+## File 02 transform motion rebuild / 5 November 2026
+
+This incremental release is built on the prior **motion-polished Next.js ZIP** (not the initial Gemini RAR). It replaces the unsatisfying transform-kinematics model with a coherent split-view motion instrument. The plan has two independently clipped moving plates with a shared matching marker; the static fault trace and moving lines no longer slip across one another incorrectly. The lower cross-fault depth section uses **into-the-page/out-of-the-page** symbols because motion is along strike: vertical displacement would be misleading. Both diagram modes share one percent-progress **illustrative** state; it is neither millimetres, slip rate, stress nor rupture forecast.
+
+- Both / surface / depth modes; 0–100% slider, smooth frame-rate-independent playback, pause/replay, 0.5–4× speed, reset, overlays, mobile horizontal pan and reduced-motion support.
+- Small additional UI-only polish in Chapter 05 adds connection symbols for the detailing selector. It does not calculate strength, sway response, safety or code compliance.
+- `npm run check:motion` now covers both the palaeogeographic timeline and transform-lab motion; `npm run preview:fault` exports representative vector frames for visual inspection. See `docs/FILE02_RELEASE_AUDIT.md` for a requirement-by-requirement accounting of **what is implemented versus not submission-ready**.
+
+This is still **not** a fully compliant submitted academic artefact until the student's independently verified analysis, real geological trace, reconstruction/source data, figure citation checks, all-states word-count audit, deployment test, self-recorded narration and signed AI-use declaration are completed. Do not describe the illustrations as empirical evidence. See the preceding verification notes and the assignment PDFs.

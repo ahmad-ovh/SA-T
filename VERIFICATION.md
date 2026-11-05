@@ -34,3 +34,14 @@ Academic deliverables not generated: student research interpretations, complete 
 - `npm install`: **BLOCKED** by npm registry DNS EAI_AGAIN. Dependencies/production Next.js build unavailable in this environment.
 - The on-screen word limit, scientific completeness (especially verified palaeogeographic model and mapped geological GIS observations), live data endpoints, student-authored interpretation, signed AI declaration and walkthrough remain the student's submission checks. No claim of total assignment completeness is made.
 - Incremental patch from `project-san-andreas-gnss-fixed.zip`: generated and verified with `git apply --check` against untouched archive extraction.
+
+## File 02 transform kinematics refinement — 5 November 2026
+
+- Baseline is exactly the previously supplied `project-san-andreas-motion-polished.zip`, including its preceding GNSS fix.
+- Rebuilt `components/FaultLab.tsx` SVGs: two coherently clipped sliding plates, paired surface marker, animated out-of-plane depth-section symbols, accessible scrub/play/speed/replay, mobile swipe fallback, reduced-motion guards. Diagram remains **conceptual** and no real offset, vertical slip or forecast values have been fabricated.
+- `scripts/test-fault-lab.mjs`: **PASS** at 0, 0.5, 2, 5, 10, 25, 50, 75, 99, 100%; tests motion direction, continuity, clipped independent plates, no vertical depth-section shifts and accessible control guards.
+- `scripts/test-motion.mjs` (Chapter 04): **PASS**; `scripts/test-gnss.mjs`: **PASS**; `scripts/check-source.mjs`: **PASS**.
+- Rendered the SVG trees directly from `components/FaultLab.tsx` at multiple positions with CairoSVG. Deliverables include a 41-frame graphical preview GIF and a separate still. Neither is a full browser UI test.
+- TypeScript syntax transpilation passed. The npm registry remains unreachable (EAI_AGAIN); `npm install`, full typecheck, Next.js production build, live-source calls and cross-browser testing remain **NOT VERIFIED**.
+- Detailed assignment status and remaining integrity/research/submission blockers: `docs/FILE02_RELEASE_AUDIT.md`.
+- Incremental patch is generated from this exact previous ZIP and independently checked for applicability before release.

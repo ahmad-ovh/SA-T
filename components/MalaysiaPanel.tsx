@@ -11,7 +11,13 @@ function Building({ ground, design }: { ground:Material;design:Design }) {
   return <svg viewBox="0 0 390 285" role="img" aria-label={`${ground} site and ${design} structure, illustrative no certified performance or intensity`}><rect width="390" height="285" fill="#d8d2bf"/><path d="M0 230H390V285H0Z" fill={ground==="soil"?"#b69c75":"#7b7f78"} className="engineering-ground"/>
     <path className="engineering-ground" d="M0 245Q50 238 90 247T180 245T275 247T390 245M0 261Q65 253 135 260T285 260T390 259" fill="none" stroke="#e3cbaa" strokeWidth="3" opacity={ground==="soil"?1:0}/>
     <path className="engineering-ground" d="M0 250l55-9 45 11 70-10 60 11 50-13 110 12" fill="none" stroke="#aaa99c" strokeWidth="4" opacity={ground==="rock"?1:0}/>
-    <g stroke={design==="ductile"?"#526d61":"#805447"} strokeWidth="4" fill="#c4b69c"><path d={`M140 229L${140+sway} 47h105l${-sway} 182Z`}/>{[91,135,179].map(y=><path key={y} d={`M${140+(sway*(229-y)/182)} ${y}H${245-(sway*(229-y)/182)}`} fill="none" strokeWidth="2"/>)}{[160,204,228].map(x=><path key={x} d={`M${x+sway/2} 48L${x} 229`} fill="none" strokeWidth="2"/>)}</g><path d={`M254 91q${sway*1.2} -20 0-39`} stroke="#8e3c32" fill="none" strokeWidth="2.5"/><text x="20" y="28" className="geo-label">{ground==="soil"?"SOFT SOIL CONCEPT":"ROCK CONCEPT"}</text><text x="20" y="271" className="svg-white">NOT A DESIGN CALCULATION</text><text x="263" y="53" className="geo-label">SWAY</text></svg>;
+    <g stroke={design==="ductile"?"#526d61":"#805447"} strokeWidth="4" fill="#c4b69c"><path d={`M140 229L${140+sway} 47h105l${-sway} 182Z`}/>{[91,135,179].map(y=><path key={y} d={`M${140+(sway*(229-y)/182)} ${y}H${245-(sway*(229-y)/182)}`} fill="none" strokeWidth="2"/>)}{[160,204,228].map(x=><path key={x} d={`M${x+sway/2} 48L${x} 229`} fill="none" strokeWidth="2"/>)}</g>
+    {/* Schematic connection markers illustrate the selected detailing category;
+        no joint response, force, resistance or acceleration is predicted. */}
+    <g className="engineering-detail" opacity={design==="ductile"?1:0} fill="#d4e2cf" stroke="#526d61" strokeWidth="2.1">
+      {[91,135,179].flatMap(y=>[140,245].map((x,i)=><g key={`${x}-${y}`} transform={`translate(${x+(x===140?1:-1)*(sway*(229-y)/182)} ${y})`}><rect x="-7" y="-6" width="14" height="12" rx="2"/><path d="M-3 0H3" strokeWidth="1.2"/></g>))}
+    </g>
+    <path d={`M254 91q${sway*1.2} -20 0-39`} stroke="#8e3c32" fill="none" strokeWidth="2.5"/><text x="20" y="28" className="geo-label">{ground==="soil"?"SOFT SOIL CONCEPT":"ROCK CONCEPT"}</text><text x="20" y="271" className="svg-white">NOT A DESIGN CALCULATION</text><text x="263" y="53" className="geo-label">SWAY</text></svg>;
 }
 export function MalaysiaPanel() {
   const [ground,setGround]=useState<Material>("soil");const [design,setDesign]=useState<Design>("rigid");const [compare,setCompare]=useState(true);
