@@ -17,12 +17,15 @@
     "audit:visible": "node scripts/audit-words-v3.mjs",
     "check:qa": "node scripts/audit-words-states.mjs && node scripts/test-qa-v4.mjs",
     "audit:states": "node scripts/audit-words-states.mjs",
-    "qa:static": "node scripts/qa-render-static.mjs qa-static.html"
+    "qa:static": "node scripts/qa-render-static.mjs qa-static.html",
+    "check:security": "node scripts/check-dependencies.mjs",
+    "check:security:strict": "node scripts/check-dependencies.mjs --strict",
+    "audit:security": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
-    "next": "15.5.6",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "next": "15.5.29",
+    "react": "19.2.9",
+    "react-dom": "19.2.9",
     "lucide-react": "0.468.0"
   },
   "devDependencies": {
@@ -33,5 +36,10 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "react-server-dom-webpack": "19.2.9",
+    "react-server-dom-parcel": "19.2.9",
+    "react-server-dom-turbopack": "19.2.9"
   }
 }

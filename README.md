@@ -17,9 +17,14 @@ npm run check:source
 npm run check:gnss
 npm run check:words
 npm run check:qa     # TSX/CSS, accessibility, import and alternate-state word audits
+npm run check:security        # verify pinned package and lockfile versions
+npm run check:security:strict # requires installed packages and a lockfile
+npm run audit:security        # npm registry advisory check after install
 ```
 
 The project is intended to deploy to Vercel as a normal Next.js App Router project. Server-side USGS and EarthScope API access requires outbound HTTPS from the deployment. No secrets, backend database, sign-in, or API keys are required.
+
+**Security release (6 November 2026):** `next@15.5.29`, `react@19.2.9`, and `react-dom@19.2.9` are now exact-pinned in `package.json`. The three `react-server-dom-*` packages are pinned to `19.2.9` via npm `overrides` if they appear as transitive dependencies. Do not add these three packages directly unless your own code requires them. Next.js carries compiled server-component code internally, so **updating Next.js itself is essential**; overrides alone are insufficient. See `docs/SECURITY_V5_RELEASE.md`.
 
 **Dependency caveat:** This handoff environment could not resolve `registry.npmjs.org` (`EAI_AGAIN`) and therefore could not install dependencies, generate a valid npm lockfile, or execute the Next.js build. `npm install` on a networked machine should create `package-lock.json`; commit that lockfile before formal deployment. Static TSX syntax inspection and structural tests were performed. Do not represent this release as build-verified.
 
