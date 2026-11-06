@@ -1,0 +1,85 @@
+{
+  "defaultWords": 1062,
+  "peakSampledVisibleWords": 1103,
+  "allOptionsCount": 19,
+  "referenceDrawerIncluded": false,
+  "states": [
+    {
+      "state": "default",
+      "visibleWords": 1062
+    },
+    {
+      "state": "evidence / seismicity",
+      "visibleWords": 1062
+    },
+    {
+      "state": "evidence / geodesy",
+      "visibleWords": 1103
+    },
+    {
+      "state": "evidence / geology",
+      "visibleWords": 1008
+    },
+    {
+      "state": "formation / 1",
+      "visibleWords": 1062
+    },
+    {
+      "state": "formation / 2",
+      "visibleWords": 1047
+    },
+    {
+      "state": "formation / 3",
+      "visibleWords": 1052
+    },
+    {
+      "state": "interior / composition",
+      "visibleWords": 1062
+    },
+    {
+      "state": "interior / mechanics",
+      "visibleWords": 1060
+    },
+    {
+      "state": "malaysia / actual",
+      "visibleWords": 1045
+    },
+    {
+      "state": "malaysia / counterfactual",
+      "visibleWords": 1062
+    },
+    {
+      "state": "timeline / 200 Ma",
+      "visibleWords": 1062
+    },
+    {
+      "state": "timeline / 100 Ma",
+      "visibleWords": 1062
+    },
+    {
+      "state": "timeline / 73 Ma",
+      "visibleWords": 1061
+    },
+    {
+      "state": "timeline / 30 Ma",
+      "visibleWords": 1065
+    },
+    {
+      "state": "timeline / 0 Ma",
+      "visibleWords": 1061
+    },
+    {
+      "state": "POI / wallace",
+      "visibleWords": 1062
+    },
+    {
+      "state": "POI / palmdale",
+      "visibleWords": 1064
+    },
+    {
+      "state": "POI / oasis",
+      "visibleWords": 1065
+    }
+  ],
+  "conclusion": "NOT CERTIFIED: sampled states <=1,200, but full cumulative alternatives, references and final student work are not fully audited."
+}

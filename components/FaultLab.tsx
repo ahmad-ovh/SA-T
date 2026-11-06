@@ -23,18 +23,23 @@ export function FaultPlan({ progress, layers }: { progress: number; layers: bool
   const { leftY, rightY, relativeGap } = getFaultMotion(progress);
   const leftMove = leftY - 201;
   const rightMove = rightY - 201;
+  const uplift = clamp(progress) / 100;
+  const faultNodes: [number,number][] = [[416,0],[420,70],[408,125],[412,163],[439,202],[433,246],[419,286],[424,338],[417,398]];
+  const curve = (dx = 0) => faultNodes.map(([x,y],i)=>`${i?"L":"M"}${x+dx} ${y}`).join(" ");
+  const leftShape = `${curve(-10)} L0 398 L0 0 Z`;
+  const rightShape = `M840 0 ${curve(10).replace(/^M/,"L")} L840 398 Z`;
   return <svg viewBox="0 0 840 398" className="fault-diagram fault-plan" role="img" aria-label={`Overhead, fault-aligned schematic of right-lateral motion. Pacific plate marker at vertical coordinate ${leftY.toFixed(0)}, North American marker at ${rightY.toFixed(0)}. Illustrative offset progress ${Math.round(progress)} percent; not to scale.`}>
     <defs>
       <linearGradient id="fault-pacific-tone" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#60766b"/><stop offset="1" stopColor="#394f49"/></linearGradient>
       <linearGradient id="fault-na-tone" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#c1a98a"/><stop offset="1" stopColor="#937a61"/></linearGradient>
       <pattern id="fault-survey-grid" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0H0V34" fill="none" stroke="#f4ebd8" strokeOpacity=".13" strokeWidth=".9"/></pattern>
       <pattern id="fault-rock-hatch" width="21" height="21" patternUnits="userSpaceOnUse" patternTransform="rotate(26)"><path d="M0 0V21" stroke="#eee0c3" strokeOpacity=".14" strokeWidth="2"/></pattern>
-      <clipPath id="fault-plate-pacific"><rect x="0" y="0" width="409" height="398"/></clipPath>
-      <clipPath id="fault-plate-america"><rect x="431" y="0" width="409" height="398"/></clipPath>
+      <clipPath id="fault-plate-pacific"><path d={leftShape}/></clipPath>
+      <clipPath id="fault-plate-america"><path d={rightShape}/></clipPath>
     </defs>
     <rect width="840" height="398" fill="#343831"/>
-    <rect x="0" width="409" height="398" fill="url(#fault-pacific-tone)"/>
-    <rect x="431" width="409" height="398" fill="url(#fault-na-tone)"/>
+    <path d={leftShape} fill="url(#fault-pacific-tone)"/>
+    <path d={rightShape} fill="url(#fault-na-tone)"/>
     <rect x="0" width="840" height="398" fill="url(#fault-survey-grid)"/>
     <g clipPath="url(#fault-plate-pacific)">
       <g transform={`translate(0 ${leftMove})`} data-plate="pacific">
@@ -65,9 +70,15 @@ export function FaultPlan({ progress, layers }: { progress: number; layers: bool
       </g>
     </g>
     {/* The narrow shear corridor is fixed; all visible offset belongs to the plate blocks. */}
-    <rect x="408" width="24" height="398" fill="#272b29"/>
-    <path d="M420 0V398" stroke="#e9c4ad" strokeOpacity=".12" strokeWidth="15"/>
-    <path d="M420 0V398" stroke="#c57968" strokeWidth="2.6" strokeDasharray="15 7"/>
+    <path d={curve()} stroke="#272b29" strokeWidth="24" fill="none" strokeLinejoin="round"/>
+    <path d={curve()} stroke="#e9c4ad" strokeOpacity=".18" strokeWidth="14" fill="none"/>
+    <path d={curve()} stroke="#eab69c" strokeWidth="3.3" strokeDasharray="15 7" strokeLinejoin="round" fill="none"/>
+    <g data-restraining-bend="illustrative" opacity={uplift} transform={`translate(475 255) scale(${0.4 + uplift*.6}) translate(-475 -255)`}>
+      <path d="M442 182 Q492 196 515 228 Q540 264 513 306 Q471 304 449 277 Q432 249 442 182 Z" fill="#ead1aa" stroke="#7e6553" strokeWidth="3"/>
+      <path d="M451 200Q492 213 502 239T501 287M457 214Q490 229 490 255T489 284M464 223Q480 237 479 266" fill="none" stroke="#806650" strokeWidth="4" strokeLinecap="round"/>
+      <path d="M467 222L479 208L491 233L498 225L510 259" stroke="#faf0dc" strokeWidth="3" fill="none" strokeLinejoin="round"/>
+    </g>
+    <g opacity={Math.min(1,uplift*3)} fontFamily="monospace" fontSize="10" fontWeight="700"><rect x="515" y="264" width="300" height="34" fill="#e9d9bc" opacity=".95"/><text x="524" y="284" fill="#503f37">LOCAL UPLIFT / RESTRAINING BEND MODEL</text></g>
     {relativeGap > 4 && <g data-offset-bracket="true" stroke="#f7caa8" strokeWidth="2" fill="none" opacity=".93">
       <path d={`M444 ${leftY}h17M444 ${rightY}h17M456 ${leftY}V${rightY}`}/>
       <path d={`m452 ${leftY + 5} 4 -5 4 5M452 ${rightY - 5}l4 5 4 -5`}/>
@@ -93,7 +104,7 @@ export function FaultPlan({ progress, layers }: { progress: number; layers: bool
       <text x="500" y="360" fill="#4f493f">PLAN VIEW  /  STRIKE ALIGNED</text>
       <text x="500" y="375" fill="#625c51">ILLUSTRATIVE POSITION · NO DISTANCE SCALE</text>
     </g>
-    <rect x="392" y="312" width="56" height="20" fill="#272b29"/>
+    <rect x="391" y="312" width="58" height="20" fill="#272b29"/>
     <text x="420" y="325" fill="#f1c4aa" textAnchor="middle" fontSize="9" fontFamily="monospace" fontWeight="700">FAULT</text>
   </svg>;
 }
@@ -113,6 +124,7 @@ export function FaultSection({ progress, layers }: { progress: number; layers: b
     <rect width="840" height="243" fill="#282d29"/>
     <rect y="0" width="840" height="32" fill="#c7c1a9"/>
     <path d="M0 32Q130 26 250 32T420 32T630 30T840 32V43H0Z" fill="#7a856b"/>
+    <path d={`M290 33 Q334 ${33-9*p} 361 ${33-28*p} Q383 ${33-42*p} 405 ${33-27*p} Q427 ${33-14*p} 452 ${33-22*p} Q476 ${33-12*p} 504 33 Z`} fill="#87916d" stroke="#d0c5a0" strokeWidth="2" opacity={p} data-local-uplift="restraining-bend-only"/>
     <rect x="0" y="43" width="418" height="200" fill="url(#fault-depth-left)"/>
     <rect x="422" y="43" width="418" height="200" fill="url(#fault-depth-right)"/>
     <g className="fault-rock-markers" opacity={layers ? 1 : 0}>
@@ -180,20 +192,20 @@ export function FaultLab() {
   };
   const stateLabel = displacement < 2 ? "ALIGNED MARKERS" : displacement > 98 ? "MAXIMUM ILLUSTRATED OFFSET" : "MARKERS SEPARATING ALONG STRIKE";
   return <section id="tectonics" className="chapter chapter-dark" data-chapter>
-    <SectionHeading number="02" label="TRANSFORM KINEMATICS" title="Tectonic Setting" summary="Two plates pass sideways. Explore the movement from above and below the ground." />
+    <SectionHeading number="02" label="TRANSFORM KINEMATICS" title="Tectonic Setting" summary="Right-lateral motion at a restraining bend can build relief. Explore both views." />
     <div className="fault-layout">
       <div className="lab-main">
         <div className="panel-heading"><span>PLATE BOUNDARY LAB / INSTRUMENT 02</span><span>ILLUSTRATIVE MOTION ONLY</span></div>
         <div className="fault-command-strip"><span className="fault-signal" aria-hidden="true"/><b>RIGHT-LATERAL / TRANSFORM</b><span>PACIFIC ↖ · NORTH AMERICA ↘</span></div>
         <div className="lab-view-tabs" role="group" aria-label="Fault diagram view">{(["overhead","split","section"] as View[]).map(v => <button type="button" key={v} aria-pressed={v === view} className={v === view ? "active" : ""} onClick={() => setView(v)}>{v === "overhead" ? "01 / SURFACE" : v === "split" ? "BOTH VIEWS" : "02 / DEPTH"}</button>)}</div>
-        <ScientificFigure figure="02" description="Original schematic: plate markers translate along the fault; the depth section shows motion perpendicular to the page. Displacement is not measured distance, velocity or a forecast.">
+        <ScientificFigure figure="02" description="Original transform schematic: illustrative bend uplift and arbitrary motion; no measurements.">
           <Diagram view={view} displacement={displacement} layers={layers}/>
         </ScientificFigure>
         <div className="fault-readout" aria-live="off"><span>OBSERVATION /</span><strong>{stateLabel}</strong><span className="fault-readout-value">{Math.round(displacement).toString().padStart(3,"0")} / 100</span></div>
       </div>
       <aside className="lab-sidebar" aria-label="Fault motion controls">
         <p className="eyebrow">CASE 02 / SHEAR MARGIN</p><h3>Two plates.<br/><em>One boundary.</em></h3>
-        <p className="body-copy">Pacific and North American plates slide past one another. Use the marker to follow their relative motion.</p>
+        <p className="body-copy">Pacific and North America slide laterally. Follow the shared marker.</p>
         <SourceLabel id="atwater1970">TECTONIC CONTEXT</SourceLabel>
         <div className="control-unit fault-scrub"><div className="control-label"><label htmlFor="fault-displacement">ILLUSTRATIVE OFFSET</label><output htmlFor="fault-displacement" aria-live="off">{Math.round(displacement)}%</output></div>
           <input id="fault-displacement" type="range" min="0" max="100" step="0.5" value={displacement} onChange={e => setOffset(Number(e.target.value))} aria-valuetext={`${Math.round(displacement)} percent of schematic motion, not a measured distance`} style={{"--fault-progress":`${displacement}%`} as CSSProperties}/>
@@ -204,7 +216,7 @@ export function FaultLab() {
         <div className="control-buttons"><button className="dark-action" type="button" disabled={reduced} onClick={togglePlay}>{playing ? <Pause size={16} aria-hidden="true"/> : <Play size={16} aria-hidden="true"/>} {playing ? "PAUSE" : displacement >= 99.99 ? "REPLAY" : "ANIMATE"}</button><button className="outline-action" type="button" onClick={() => setOffset(0)}><RotateCcw size={15} aria-hidden="true"/> RESET</button></div>
         {reduced && <p className="motion-hint">Reduced motion is active. Inspect positions with the slider or keyboard arrows.</p>}
         <div className="fault-key"><span className="fault-key-chip">×</span>Into page <span className="fault-key-chip dot">•</span>Out of page</div>
-        <div className="model-caution"><b>NOT AN EARTHQUAKE PREDICTION</b><p>Not to scale. The section shows horizontal motion into/out of the page—not vertical slip.</p></div>
+        <div className="model-caution"><b>NOT AN EARTHQUAKE PREDICTION</b><p>A conceptual restraining bend may uplift. Other fault segments differ. Cross-section symbols indicate horizontal—not vertical—slip.</p></div>
       </aside>
     </div>
     <div className="bottom-research"><b>SCIENTIFIC EXPLANATION</b><ResearchSlot>{story.tectonics.mechanism}</ResearchSlot></div>

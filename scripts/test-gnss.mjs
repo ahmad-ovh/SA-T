@@ -39,6 +39,12 @@ assert.match(sample[0].epoch,/not reported/);
 assert.throws(()=>parseGnssCsv(csv.replace("BEMT,","SBCC,")),/Duplicate/);
 assert.throws(()=>parseGnssCsv(csv.replace("BEMT,34.001,-115.998,-4.0,4.6,NAM14,","BEMT,34.001,-115.998,-4.0,4.6,IGS14,")),/Do not mix/);
 
+// Import QA: empty numeric cells used to be converted to valid zero velocities.
+assert.throws(()=>parseGnssCsv(csv.replace('SBCC,', 'SBCC,').replace(',-26.1,', ',,-26.1,')),/seven columns|Blank GNSS numeric/);
+assert.throws(()=>parseGnssCsv(csv.replace(',-26.1,', ',,').replace(',,27.3', ',,27.3')), /Blank GNSS numeric/);
+assert.throws(()=>parseGnssCsv(csv.replace('SBCC,', '=1+1,')),/Invalid station ID/);
+assert.equal(parseGnssCsv('\uFEFF'+csv).length,2, 'UTF-8 BOM accepted');
+assert.throws(()=>parseGnssCsv(csv.replace(',-26.1,27.3,', ',Infinity,27.3,')),/Invalid GNSS row/);
 // Format v1.1.0 columns: site name refEpoch refJday X Y Z lat lon height
 // dX dY dZ SX SY SZ Rxy Rxz Ryz dN dE dU SN SE SU Rne Rnu Reu first last.
 function modernRow(site, {lat=34.5, lon=240.3, north="0.01230",east="-0.02450",sigma="0.00030",last="20241001120000"}={}) {

@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const read=(f)=>fs.readFileSync(f,'utf8');
+const atlas=read('components/CaliforniaAtlas.tsx');
+const earth=read('components/EarthInterior.tsx');
+const evidence=read('components/EvidenceDesk.tsx');
+const fault=read('components/FaultLab.tsx');
+const malaysia=read('components/MalaysiaPanel.tsx');
+const style=read('app/globals.css');
+const assets=read('src/data/user-media.ts');
+for(const name of ['Wallace Creek','Palmdale Roadcut','Thousand Palms Oasis'])assert(atlas.includes(name),`Missing POI ${name}`);
+for(const id of ['wallace','palmdale','oasis'])assert(atlas.includes(`id: "${id}"`),`Missing map marker ${id}`);
+assert(atlas.includes('role="button"')&&atlas.includes('onKeyDown'), 'POI keyboard control absent');
+assert(evidence.includes('<CaliforniaAtlas compact events={filtered}/>'),'No California atlas in quake panel');
+assert(earth.includes('<FormationArt stage={stage as 0|1|2}/>'),'Formation graphic absent');
+assert(earth.includes('layer-accordion-content') && earth.includes('aria-expanded={selected===i}'),'Accordion missing');
+assert(fault.includes('RESTRAINING BEND')||fault.includes('restraining bend'),'Bend note missing');
+assert(malaysia.includes('export function MotionInset') && malaysia.includes('PeninsularSection'),'Malaysia two-view visualization absent');
+assert(malaysia.includes('type="range"') && malaysia.includes('COUNTERFACTUAL'),'Malaysia time control / caveat absent');
+assert(style.includes('.chapter-nav a:hover,.chapter-nav a:focus-visible{background:'),'No rectangular top-tab focus/hover');
+assert(style.includes('prefers-reduced-motion:reduce'),'Motion accessibility missing');
+assert(assets.includes('nebular-paper') && assets.includes('safod2010'),'Missing future paper slots');
+for(const f of ['public/assets/README.md','public/assets/papers/README.md','docs/V3_UI_RELEASE_AUDIT.md'])assert(fs.existsSync(f),'Missing media/audit readme '+f);
+console.log('V3 implementation source assertions: PASS (POIs, formation, accordion, fault, evidence, Malaysia, navigation, media slots)');

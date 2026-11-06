@@ -16,6 +16,7 @@ npm run start
 npm run check:source
 npm run check:gnss
 npm run check:words
+npm run check:qa     # TSX/CSS, accessibility, import and alternate-state word audits
 ```
 
 The project is intended to deploy to Vercel as a normal Next.js App Router project. Server-side USGS and EarthScope API access requires outbound HTTPS from the deployment. No secrets, backend database, sign-in, or API keys are required.
@@ -31,7 +32,7 @@ The project is intended to deploy to Vercel as a normal Next.js App Router proje
 - `components/FaultLab.tsx`: right-lateral demonstrative map + depth diagram, view/speed/offset/playback/overlay controls. **Not a forecast or physical prediction.**
 - `components/EvidenceDesk.tsx`: USGS earthquake map/depth histogram, **preloaded EarthScope-sourced GNSS velocities** with official-source refresh and CSV downloads, and conceptual geologic offset.
 - `components/TimeMachine.tsx`: 200–0 Ma schematic timeline, time control, epoch markers and comparison slider. **No unverified model state is portrayed as a published reconstruction.**
-- `components/MalaysiaPanel.tsx`: illustrative soil/rock and structural detailing comparisons.
+- `components/MalaysiaPanel.tsx`: Peninsular Malaysia versus explicitly hypothetical transform cross-section and plan inset with a time-progress slider.
 - `components/ReferenceArchive.tsx`: bibliography drawer (not a sixth chapter).
 - `src/content/story.ts`: **student-authored interpretation placeholders** and copy.
 - `src/data/sources.ts`: references, DOI/source links and dataset caveats.
@@ -174,3 +175,22 @@ This incremental release is built on the prior **motion-polished Next.js ZIP** (
 - `npm run check:motion` now covers both the palaeogeographic timeline and transform-lab motion; `npm run preview:fault` exports representative vector frames for visual inspection. See `docs/FILE02_RELEASE_AUDIT.md` for a requirement-by-requirement accounting of **what is implemented versus not submission-ready**.
 
 This is still **not** a fully compliant submitted academic artefact until the student's independently verified analysis, real geological trace, reconstruction/source data, figure citation checks, all-states word-count audit, deployment test, self-recorded narration and signed AI-use declaration are completed. Do not describe the illustrations as empirical evidence. See the preceding verification notes and the assignment PDFs.
+
+## V3 larger UI / source-index atlas and Malaysia scenario — 6 November 2026
+
+The current handoff adds a larger-format responsive interface with rectangular nav-hover/focus treatment, clickable California field-site atlas, source-specific formation figures, inline Earth-layer accordion, kinked-fault restraining-bend cue, California-backed earthquake map, and a counterfactual Peninsular Malaysia time slider with coupled section/plan views. The prior GNSS and palaeogeography work remains. For assets, see `public/assets/README.md` and `src/data/user-media.ts`. For scientific restrictions, verification state and all **unmet rubric items**, read `docs/V3_UI_RELEASE_AUDIT.md`.
+
+**This version is not submission-certified:** the conservative default on-screen word audit currently estimates about 1,200 words (assignment maximum 1,200; inactive states and bibliography not yet enumerated); scientific source/data authoring and full browser deployment/QA are pending. The user's own geological interpretation, in-text citations, media permissions, AI-use declaration and narrated walkthrough remain necessary. Do not substitute decorative diagrams for a third measured line of evidence.
+
+## V4 QA and source-level fixes
+
+The V4 QA update fixes mobile formation/fault-heading overflow, CSV validation of blanks and untrusted station identifiers, repeated California SVG definition IDs, arrow-key Evidence tabs, mobile-menu Escape/focus, and exported CSV download cleanup. It also avoids presenting user-imported GNSS values as independently verified. Animation models and source data are retained.
+
+`npm run check:qa` runs source assertions and an **alternate-state** text estimator (not a full on-device or final-submission word audit). A Chromium **static-layout** smoke test is optionally reproducible with Python Playwright:
+
+```bash
+npm run qa:static          # creates qa-static.html; rendered TSX snapshot, NO React interaction
+python scripts/qa-static-browser.py  # Playwright + Chromium required; outputs qa-output/
+```
+
+The static test cannot verify live buttons, React hydration, runtime animation, API transport, or a Next.js production build. See `docs/QA_V4_RELEASE_REPORT.md` for the verification matrix and unresolved assignment criteria.

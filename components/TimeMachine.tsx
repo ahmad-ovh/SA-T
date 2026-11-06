@@ -82,14 +82,14 @@ export function TimeVisual({ ma, id, compact = false }: { ma: number; id: string
       <text x="12" y="18" fontFamily="monospace" fontSize="10" letterSpacing="1.6" fill="#f1e6d4">{compact ? "CONCEPTUAL MARGIN" : "SCHEMATIC • NOT TO SCALE"}</text>
     </g>
     <g fontFamily="monospace" fontSize="12" fontWeight="bold" letterSpacing=".5">
-      <text x="30" y="82" fill="#f1e9d8" opacity={oldMargin}>FARALLON / OCEANIC</text>
-      <text x="30" y="82" fill="#f1e9d8" opacity={transform}>PACIFIC PLATE</text>
+      {oldMargin>.01&&<text x="30" y="82" fill="#f1e9d8" opacity={oldMargin}>FARALLON / OCEANIC</text>}
+      {transform>.01&&<text x="30" y="82" fill="#f1e9d8" opacity={transform}>PACIFIC PLATE</text>}
       <text x="488" y="82" fill="#494137">NORTH AMERICA</text>
-      <text x="30" y="386" fill="#f1e9d8" opacity={subduction}>CONVERGENT MARGIN</text>
-      <text x="30" y="386" fill="#f1e9d8" opacity={transition}>RIDGE–TRENCH CONTACT</text>
-      <text x="30" y="386" fill="#f1e9d8" opacity={transform}>RIGHT-LATERAL TRANSFORM</text>
+      {subduction>.01&&<text x="30" y="386" fill="#f1e9d8" opacity={subduction}>CONVERGENT MARGIN</text>}
+      {transition>.01&&<text x="30" y="386" fill="#f1e9d8" opacity={transition}>RIDGE–TRENCH CONTACT</text>}
+      {transform>.01&&<text x="30" y="386" fill="#f1e9d8" opacity={transform}>RIGHT-LATERAL TRANSFORM</text>}
     </g>
-    <g transform="translate(450 332)"><rect width="249" height="54" fill="#e9dec7" fillOpacity=".9"/><text x="12" y="20" fill="#493e35" fontFamily="monospace" fontSize="11">INTERPRETIVE DIAGRAM</text><text x="12" y="38" fill="#645c4d" fontFamily="monospace" fontSize="10">NOT A PLATE ROTATION MODEL</text></g>
+    {!compact&&<g transform="translate(450 332)"><rect width="249" height="54" fill="#e9dec7" fillOpacity=".9"/><text x="12" y="20" fill="#493e35" fontFamily="monospace" fontSize="11">INTERPRETIVE DIAGRAM</text><text x="12" y="38" fill="#645c4d" fontFamily="monospace" fontSize="10">NOT A PLATE ROTATION MODEL</text></g>}
   </svg>;
 }
 
@@ -160,7 +160,7 @@ export function TimeMachine() {
   }
 
   return <section id="deep-time" className="chapter chapter-dark" data-chapter>
-    <SectionHeading number="04" label="RECONSTRUCTION RECORD" title="Then & Now" summary="A boundary is not timeless. Follow the changing tectonic regime over 200 million years."/>
+    <SectionHeading number="04" label="RECONSTRUCTION RECORD" title="Then & Now" summary="Explore tectonic change from 200 Ma to the present."/>
     <div className="time-main">
       <div className="panel-heading"><span>PALEOGEOGRAPHIC READER / FILE 04</span><span>CONCEPTUAL ANIMATED DIAGRAM</span></div>
       <div className="time-display"><TimeVisual ma={ma} id="time-main"/>
@@ -183,11 +183,11 @@ export function TimeMachine() {
     </div>
     <div className="time-notes">
       <div className="reading-panel" aria-live="off"><p className="eyebrow">CLOSEST SCHEMATIC EPOCH</p><h3>{keyframe.title} / {keyframe.label}</h3><p>{keyframe.regime} · {keyframe.plate}</p><SourceLabel id="atwater1970">ATWATER / GEOLOGICAL CONTEXT</SourceLabel></div>
-      <div className="reading-panel"><p className="eyebrow">MODEL INTEGRITY</p><h3>What this can—and cannot—show.</h3><p>This is a conceptual transition, not a published coordinate reconstruction. The moving plate outlines and intervening dates are illustrative; the modern fault is absent in older stages.</p><ResearchSlot>{story.time.interpretation}</ResearchSlot></div>
+      <div className="reading-panel"><p className="eyebrow">MODEL INTEGRITY</p><h3>What this can—and cannot—show.</h3><p>Conceptual, not a coordinate reconstruction: outlines and intermediate dates are illustrative. The modern fault is absent from older stages.</p><ResearchSlot>{story.time.interpretation}</ResearchSlot></div>
     </div>
     <div className="comparison-unit">
       <div className="panel-heading"><span>THEN / NOW COMPARISON</span><span>DRAG ON IMAGE OR USE SLIDER</span></div>
-      <ScientificFigure figure="04" description="Original schematic comparison, using interpretive plate outlines rather than measured palaeogeographic coordinates.">
+      <ScientificFigure figure="04" description="Original comparison; conceptual outlines, not palaeogeographic coordinates.">
         <div className="time-compare" ref={compareRef} onPointerDown={e=>{e.currentTarget.setPointerCapture(e.pointerId);positionCompare(e.clientX);}} onPointerMove={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))positionCompare(e.clientX);}} onPointerUp={e=>{if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}}>
           <div className="compare-layer"><TimeVisual ma={200} id="compare-then" compact/></div>
           <div className="compare-layer compare-top" style={{clipPath:`inset(0 ${100-compare}% 0 0)`}}><TimeVisual ma={0} id="compare-now" compact/></div>

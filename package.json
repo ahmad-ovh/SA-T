@@ -12,7 +12,12 @@
     "check:gnss": "node scripts/test-gnss.mjs",
     "check:motion": "node scripts/test-motion.mjs && node scripts/test-fault-lab.mjs",
     "preview:motion": "node scripts/preview-motion.mjs",
-    "preview:fault": "node scripts/preview-fault.mjs"
+    "preview:fault": "node scripts/preview-fault.mjs",
+    "check:v3": "node scripts/test-v3.mjs",
+    "audit:visible": "node scripts/audit-words-v3.mjs",
+    "check:qa": "node scripts/audit-words-states.mjs && node scripts/test-qa-v4.mjs",
+    "audit:states": "node scripts/audit-words-states.mjs",
+    "qa:static": "node scripts/qa-render-static.mjs qa-static.html"
   },
   "dependencies": {
     "next": "15.5.6",

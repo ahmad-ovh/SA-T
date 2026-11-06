@@ -45,3 +45,16 @@ Academic deliverables not generated: student research interpretations, complete 
 - TypeScript syntax transpilation passed. The npm registry remains unreachable (EAI_AGAIN); `npm install`, full typecheck, Next.js production build, live-source calls and cross-browser testing remain **NOT VERIFIED**.
 - Detailed assignment status and remaining integrity/research/submission blockers: `docs/FILE02_RELEASE_AUDIT.md`.
 - Incremental patch is generated from this exact previous ZIP and independently checked for applicability before release.
+
+## V3 interface expansion — 6 November 2026 (local source QA)
+
+- Exact baseline: `project-san-andreas-file02-polished.zip` (earlier Chapters 02/04 animation and EarthScope changes preserved).
+- Implemented: enlarged responsive fonts/panels, rectangular top navigation hover/focus, sourced field-site California atlas with three interactive POIs, active formation-tab art + local replacement slots, inline Earth-layer accordion, bent transform with conceptual local uplift, seismicity atlas overlay, Peninsular Malaysia actual/counterfactual slider with plan and cross-section views; optional local PDF viewer slot hooks.
+- Baseline GNSS, motion and source tests all passed; TS/TSX syntax transpilation and PostCSS parsing passed. Direct CairoSVG frame rendering used for source-based visual checks; no production browser QA completed.
+- **Word limit:** local default-state counting excluding closed modal and SVG hover titles estimates 1,200 words at the limit *before* evaluating alternate tabs. Correct before submission.
+- **Unverified:** npm install, full `next build`, device/browser accessibility, California GIS survey accuracy, live source endpoints, uploaded PDFs/images, independent measured geological third evidence, published quantitative palaeogeography, student-authored scientific chain, cover sheet, walkthrough and deployment.
+- Extra checklist and media directions: `docs/V3_UI_RELEASE_AUDIT.md`, `public/assets/README.md`.
+
+## V4 QA update (6 November 2026)
+
+See `docs/QA_V4_RELEASE_REPORT.md` and `docs/QA_WORD_AUDIT.json` for the exact source fixes, mobile browser-layout checks, and academic limitations. V4 fixes GNSS blank-numeric imports, duplicate California SVG IDs, keyboard Evidence tabs, mobile text clipping, source-attribution wording, navigation focus, and stale development word diagnostics. The sampled 19-state word audit is 1,062 default / 1,103 peak before student-authored work. **This is not a complete 1,200-word submission certification.** Dependencies remain unavailable here, so production `next build`, hydration, API responses and real interactions were **not** tested.

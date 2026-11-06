@@ -8,3 +8,10 @@ out/
 .DS_Store
 # Local visual QA export; not part of the deployable artefact
 motion-frames.html
+
+# QA render-only artifacts (not shipped as part of the exhibit)
+qa-static.html
+qa-output/
+qa-*.png
+qa-layout-report.json
+word-audit-default.txt
